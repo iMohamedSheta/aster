@@ -97,21 +97,47 @@ required.
 
 ## Cutting a release
 
+Add the release notes to `CHANGELOG.md` first, grouped into features and fixes:
+
+```markdown
+## 1.2.3 — 2026-11-19
+
+### Features
+
+- What users can do now.
+
+### Fixes and hardening
+
+- What no longer goes wrong.
+```
+
+Then tag the commit:
+
 ```bash
 git tag v1.2.3
 git push origin v1.2.3
 ```
+
+The publish job extracts the matching `CHANGELOG.md` section into the GitHub
+release body and appends a link to the tag's commits. When the section is
+missing it falls back to GitHub's generated notes.
 
 The `Release` workflow then:
 
 1. Reads `1.2.3` from the tag and rejects malformed tags.
 2. Builds Windows amd64/ARM64, macOS universal, and the Linux matrix.
 3. Signs binaries when the secrets are configured.
-4. Creates a **draft** GitHub release for the tag.
+4. Creates a **draft** GitHub release for the tag with the changelog notes.
 5. Uploads every asset and `SHA256SUMS.txt`.
 6. Generates and signs `latest.json`, verifies the signature against the
    committed public key, and uploads it **last**.
 7. Publishes the release (or marks it a prerelease).
+
+GitHub release assets on a **private** repository require authentication for
+every download. Aster's updater makes anonymous HTTPS requests, so either make
+the repository public or mirror the assets to a public release repository.
+Until then, `releases/latest/download/latest.json` returns 404 to installed
+apps and in-app updates cannot run.
 
 A prerelease tag such as `v1.2.3-beta.1` is published with the prerelease flag.
 GitHub's `releases/latest` excludes prereleases, so installed users stay on the
