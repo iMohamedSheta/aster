@@ -467,8 +467,17 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          notes_args=(--generate-notes)
+          if [ -f CHANGELOG.md ] \
+            && bash scripts/release-notes.sh "$VERSION" > "$RUNNER_TEMP/release-notes.md" \
+            && [ -s "$RUNNER_TEMP/release-notes.md" ]; then
+            printf '\n**Full changelog:** https://github.com/%s/commits/%s\n' \
+              "$GITHUB_REPOSITORY" "$TAG" >> "$RUNNER_TEMP/release-notes.md"
+            notes_args=(--notes-file "$RUNNER_TEMP/release-notes.md")
+          fi
+
           if ! gh release view "$TAG" >/dev/null 2>&1; then
-            gh release create "$TAG" --draft --title "Aster $VERSION" --generate-notes
+            gh release create "$TAG" --draft --title "Aster $VERSION" "${notes_args[@]}"
           fi
 
           for file in dist/*; do
