@@ -162,7 +162,9 @@ jobs:
   macos:
     name: macOS universal
     needs: prepare
-    runs-on: macos-14
+    # macOS 14 hosted images were retired on 2026-11-02. macOS 15 is the
+    # current arm64 image and can still build a universal Intel/Apple binary.
+    runs-on: macos-15
     env:
       ASTER_VERSION: ${{ needs.prepare.outputs.version }}
       REQUIRE_SIGNING: ${{ vars.REQUIRE_SIGNING }}
