@@ -58,6 +58,14 @@ export function ChangeOwnPassword(arg1, arg2) {
   return window['go']['main']['App']['ChangeOwnPassword'](arg1, arg2);
 }
 
+export function CheckForUpdates(arg1) {
+  return window['go']['main']['App']['CheckForUpdates'](arg1);
+}
+
+export function ClearSkippedUpdate() {
+  return window['go']['main']['App']['ClearSkippedUpdate']();
+}
+
 export function ClearSyncActivity() {
   return window['go']['main']['App']['ClearSyncActivity']();
 }
@@ -110,6 +118,10 @@ export function DeleteEntity(arg1, arg2) {
   return window['go']['main']['App']['DeleteEntity'](arg1, arg2);
 }
 
+export function DeletePayrollEntry(arg1) {
+  return window['go']['main']['App']['DeletePayrollEntry'](arg1);
+}
+
 export function Devices() {
   return window['go']['main']['App']['Devices']();
 }
@@ -120,6 +132,10 @@ export function DisconnectSync() {
 
 export function DiscoverHosts() {
   return window['go']['main']['App']['DiscoverHosts']();
+}
+
+export function DownloadUpdate() {
+  return window['go']['main']['App']['DownloadUpdate']();
 }
 
 export function Encounter(arg1) {
@@ -146,8 +162,16 @@ export function FinishPatientFileUpload(arg1) {
   return window['go']['main']['App']['FinishPatientFileUpload'](arg1);
 }
 
+export function GeneratePayroll(arg1, arg2) {
+  return window['go']['main']['App']['GeneratePayroll'](arg1, arg2);
+}
+
 export function HostStatus() {
   return window['go']['main']['App']['HostStatus']();
+}
+
+export function InstallUpdate() {
+  return window['go']['main']['App']['InstallUpdate']();
 }
 
 export function Inventory(arg1) {
@@ -204,6 +228,14 @@ export function PatientFiles(arg1, arg2, arg3) {
 
 export function Patients(arg1, arg2, arg3) {
   return window['go']['main']['App']['Patients'](arg1, arg2, arg3);
+}
+
+export function PayPayrollEntry(arg1, arg2, arg3, arg4) {
+  return window['go']['main']['App']['PayPayrollEntry'](arg1, arg2, arg3, arg4);
+}
+
+export function PayrollBoard(arg1, arg2) {
+  return window['go']['main']['App']['PayrollBoard'](arg1, arg2);
 }
 
 export function Prescription(arg1) {
@@ -270,12 +302,20 @@ export function SavePatientFileAs(arg1) {
   return window['go']['main']['App']['SavePatientFileAs'](arg1);
 }
 
+export function SavePayrollEntry(arg1) {
+  return window['go']['main']['App']['SavePayrollEntry'](arg1);
+}
+
 export function SaveService(arg1) {
   return window['go']['main']['App']['SaveService'](arg1);
 }
 
 export function SaveStaff(arg1) {
   return window['go']['main']['App']['SaveStaff'](arg1);
+}
+
+export function SaveStaffPay(arg1, arg2, arg3, arg4, arg5) {
+  return window['go']['main']['App']['SaveStaffPay'](arg1, arg2, arg3, arg4, arg5);
 }
 
 export function SaveTask(arg1) {
@@ -304,6 +344,10 @@ export function SetActiveLocation(arg1) {
 
 export function SetAppointmentStatus(arg1, arg2) {
   return window['go']['main']['App']['SetAppointmentStatus'](arg1, arg2);
+}
+
+export function SetAutoUpdate(arg1) {
+  return window['go']['main']['App']['SetAutoUpdate'](arg1);
 }
 
 export function SetSignInMode(arg1) {
@@ -344,6 +388,10 @@ export function SignInWithPassword(arg1, arg2) {
 
 export function SignOut() {
   return window['go']['main']['App']['SignOut']();
+}
+
+export function SkipUpdate(arg1) {
+  return window['go']['main']['App']['SkipUpdate'](arg1);
 }
 
 export function Staff() {
@@ -390,6 +438,10 @@ export function TreatmentPlans(arg1, arg2) {
   return window['go']['main']['App']['TreatmentPlans'](arg1, arg2);
 }
 
+export function UnpayPayrollEntry(arg1) {
+  return window['go']['main']['App']['UnpayPayrollEntry'](arg1);
+}
+
 export function UpdateAppointment(arg1, arg2) {
   return window['go']['main']['App']['UpdateAppointment'](arg1, arg2);
 }
@@ -404,6 +456,10 @@ export function UpdatePatientFile(arg1, arg2) {
 
 export function UpdatePrescriptionStatus(arg1, arg2) {
   return window['go']['main']['App']['UpdatePrescriptionStatus'](arg1, arg2);
+}
+
+export function UpdateState() {
+  return window['go']['main']['App']['UpdateState']();
 }
 
 export function UploadPatientFile(arg1) {

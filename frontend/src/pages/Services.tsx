@@ -73,7 +73,7 @@ export function Services() {
   return (
     <div className="space-y-5">
       <PageHeader
-        eyebrow="Clinic finances"
+        eyebrow="Clinic catalogue"
         title="Services"
         description="The price list behind invoices. Add consultations, procedures and laboratory tests once, then pick them while billing."
         actions={(

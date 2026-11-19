@@ -633,3 +633,52 @@ export namespace syncengine {
 
 }
 
+export namespace updater {
+	
+	export class State {
+	    status: string;
+	    currentVersion: string;
+	    latestVersion: string;
+	    notesUrl: string;
+	    publishedAt: string;
+	    assetName: string;
+	    assetSize: number;
+	    downloaded: number;
+	    progress: number;
+	    message: string;
+	    error: string;
+	    checkedAt: string;
+	    autoCheck: boolean;
+	    skipped: boolean;
+	    verified: boolean;
+	    justUpdatedFrom: string;
+	    platform: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new State(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.status = source["status"];
+	        this.currentVersion = source["currentVersion"];
+	        this.latestVersion = source["latestVersion"];
+	        this.notesUrl = source["notesUrl"];
+	        this.publishedAt = source["publishedAt"];
+	        this.assetName = source["assetName"];
+	        this.assetSize = source["assetSize"];
+	        this.downloaded = source["downloaded"];
+	        this.progress = source["progress"];
+	        this.message = source["message"];
+	        this.error = source["error"];
+	        this.checkedAt = source["checkedAt"];
+	        this.autoCheck = source["autoCheck"];
+	        this.skipped = source["skipped"];
+	        this.verified = source["verified"];
+	        this.justUpdatedFrom = source["justUpdatedFrom"];
+	        this.platform = source["platform"];
+	    }
+	}
+
+}
+

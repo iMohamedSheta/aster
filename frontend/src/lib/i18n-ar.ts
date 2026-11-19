@@ -1322,6 +1322,7 @@ export const AR: Record<string, string> = {
   'Brazilian real': 'ريال برازيلي',
   'Canadian dollar': 'دولار كندي',
   'Clinic finances': 'مالية العيادة',
+  'Clinic catalogue': 'دليل الخدمات',
   'Clinic intelligence': 'تحليلات العيادة',
   'Clinical judgement.': 'الحكم السريري.',
   'Clinical records': 'السجلات السريرية',
