@@ -144,19 +144,23 @@ jobs:
             Write-Host '::warning::Windows binaries are unsigned. Configure WINDOWS_CERT_PFX_BASE64 and WINDOWS_CERT_PASSWORD for production releases.'
           }
 
-      - name: Build portable zip
+      - name: Stage release assets
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path dist | Out-Null
+          $setup = "build\bin\Aster-$env:ASTER_VERSION-windows-$env:ASTER_ARCH-setup.exe"
+          if (-not (Test-Path $setup)) { throw "Installer $setup was not produced." }
+          Copy-Item $setup "dist\" -Force
           Compress-Archive -Path build\bin\Aster.exe `
             -DestinationPath "dist\Aster-$env:ASTER_VERSION-windows-$env:ASTER_ARCH-portable.zip" -Force
 
       - uses: actions/upload-artifact@v4
         with:
           name: windows-${{ matrix.arch }}
-          path: |
-            build/bin/Aster-${{ needs.prepare.outputs.version }}-windows-${{ matrix.arch }}-setup.exe
-            dist/Aster-*-portable.zip
+          # Upload a single flat folder. Mixing build/bin and dist made the
+          # artifact keep a build/ directory, which the publish job then tried
+          # to upload as if it were a file.
+          path: dist/*
           if-no-files-found: error
 
   macos:
