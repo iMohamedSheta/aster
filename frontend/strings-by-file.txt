@@ -1,0 +1,1214 @@
+
+### src\App.tsx
+Aster
+Aster’s data service is normally started together with the desktop application. If you opened this page in a browser, the native bridge is unavailable.
+Close Aster
+Local-first clinic workspace
+The clinic backend did not answer.
+Try again
+
+### src\components\AppointmentDialog.tsx
+${…} at ${…}
+Arrived
+Cancel
+Cancelled
+Completed
+Confirmed
+Date
+Duration
+e.g. Follow-up: blood pressure review
+Ends at
+In progress
+minutes
+No show
+Notes
+Patient
+Preparation, interpreter, or scheduling notes.
+Provider
+Reason for visit
+Room
+Room 2
+Scheduled
+Status
+The calendar updates on every connected device.
+Time
+Unassigned
+Waiting
+
+### src\components\BillingDialogs.tsx
+${…} · balance ${…}
+Active
+Add line
+Amount (${…})
+Applied before tax. Subtotal ${…}.
+Bank transfer
+Cancel
+Card
+Cash
+Category
+Code
+CONS-FU
+Consultation
+Consultations
+Create invoice
+Custom item
+Description
+Discount
+Due date
+Follow-up visit
+Inactive services stay on historical invoices but cannot be selected.
+Insurance
+Invoice created
+Invoices are permanent once issued. Record a void if a correction is needed.
+Method
+Minutes
+Name
+New invoice
+Note on invoice
+Notes
+Optional message for the patient.
+Other
+Patient
+Payment recorded
+Price
+Qty
+Receipt or card reference
+Record a payment
+Record payment
+Reference
+Save
+Service
+Services & items
+Services appear in the invoice builder and can be filtered by category.
+Subtotal
+Tax
+Tax rate %
+Total
+Total due
+Unit (${…})
+
+### src\components\ClinicalDialogs.tsx
+Active
+Active allergy
+Allergen
+Code
+Condition
+Diagnosed on
+Document what was observed, not a diagnosis. The care team reviews allergy details at every visit.
+Essential hypertension
+Hives, swelling, anaphylaxis…
+I10
+Inactive
+Inactive allergies remain in history without alerts.
+Life threatening
+Mild
+Moderate
+Noted on
+Notes
+Penicillin
+Problem list entries sync with the rest of the record.
+Reaction
+Resolved
+Save
+Serious allergies are highlighted wherever the patient record is opened.
+Severe
+Severity
+Status
+The active problem list is shown in the patient summary and visit editor.
+
+### src\components\CommandPalette.tsx
+Appointments
+Aster search
+Billing
+Book an appointment
+Create
+Create an invoice
+Dashboard
+Esc
+Go to
+navigate
+No match for “
+open
+Patients
+Prescriptions
+Register a patient
+Reports
+Search and commands
+Search patients or jump to a page…
+Settings
+Start a visit
+Tip: type a name, MRN or phone number to open a patient record instantly.
+Visits
+
+### src\components\InvoiceDetailModal.tsx
+Amount
+Balance due
+Billed to
+Close
+Could not void invoice
+Description
+Discount
+Due
+Invoice voided
+Issued
+Paid
+Payments
+Print
+Qty
+Record payment
+Subtotal
+Tax
+The invoice remains in the audit trail with its amount, but it can no longer be paid. This cannot be undone.
+Total
+Unit
+Void
+Void invoice
+Void this invoice?
+
+### src\components\Logo.tsx
+Aster
+Clinic
+
+### src\components\PatientDialog.tsx
+Accessibility needs, communication preferences, or context for the care team.
+Active
+Alternate phone
+Amelia
+Auto
+Blood type
+City
+Contact
+Date of birth
+Divorced
+e.g. Blue Shield
+Email
+Emergency & insurance
+Emergency contact
+Emergency phone
+Female
+First name *
+Hart
+Identity
+Inactive
+Insurance provider
+Intersex
+Last name *
+Male
+Marital status
+Married
+Mobile phone
+Name and relationship
+name@example.com
+National ID
+Not recorded
+Occupation
+Optional
+Other
+Policy / member number
+Prefer not to say
+Preferred name
+Record number
+Sex
+Single
+Status
+Street address
+Widowed
+
+### src\components\PatientPicker.tsx
+Choose another patient
+
+### src\components\PrescriptionDetailModal.tsx
+${…} days
+Close
+Could not update prescription
+Directions
+Issued ${…} by ${…}
+Mark completed
+Medication
+Patient
+Prescription · ${…} ${…}
+Prescription ${…}
+Print prescription
+Qty
+Refills
+
+### src\components\PrescriptionDialog.tsx
+${…} medication${…} · ready to print
+1 tablet
+500 mg
+Add another medication
+Click to add a pre-filled line
+Common medications
+Days
+Dose
+Drug name
+e.g. Amoxicillin
+Each medication is recorded as a separate line on the printed prescription.
+Form
+Frequency
+Instructions
+Issue prescription
+medication
+Medication
+New prescription
+Patient
+Prescriber notes
+Prescription issued
+Printed below the medication table.
+Qty
+Refills
+Review at follow-up. Encourage hydration.
+Strength
+tablet
+Take with food. Avoid alcohol.
+Twice daily
+
+### src\components\Sidebar.tsx
+About Aster
+Administration
+Appointments
+Billing
+Care
+Clinic profile
+Clinic settings
+Could not switch user
+Dashboard
+Finance
+Patients
+Prescriptions
+Reports
+Sample records
+Settings
+Switched user
+v
+Visits
+Working as
+Workspace
+
+### src\components\StaffDialog.tsx
+${…} can be selected for appointments and visits.
+Active
+Billing
+Calendar colour
+Clinic owner
+Dr. Maya Chen
+Email
+Family medicine
+Family Medicine
+Front desk
+Full name
+h-6 w-6 rounded-full border-2 transition ${…}
+License / registration
+Nurse
+Phone
+Physician
+Role
+Roles determine what each person can do in the clinic workspace.
+Save
+Specialization
+Title
+Use colour ${…}
+
+### src\components\TitleBar.tsx
+All changes synced
+Close
+conflict
+Maximise
+Maximise or restore
+Minimise
+Offline · ${…} queued
+On this computer
+Sample
+Sync needs attention
+Syncing ${…}…
+Toggle appearance
+
+### src\components\Toast.tsx
+Dismiss
+
+### src\components\TopBar.tsx
+Book an appointment
+Create an invoice
+Ctrl K
+New
+Quick add
+Register a patient
+Search patients and records…
+Start a visit
+
+### src\components\VisitDialog.tsx
+Annual physical
+Anything to remember before the examination…
+Chief complaint
+Clinician
+Follow-up
+In the patient's words, e.g. sore throat for three days
+Office visit
+Opened at ${…}
+Opening note
+Opens a draft encounter. Nothing is signed until you review and close the visit.
+Optional. Captured in the plan section of the draft.
+Procedure
+Start a visit
+Start visit
+Telehealth
+The visit opens as a draft, so you can record vitals, diagnoses and prescriptions before signing. Signed visits become read-only and can only receive addenda.
+Unassigned
+Urgent / same day
+Visit started
+Visit type
+
+### src\components\charts.tsx
+spark-${…}
+trend-${…}
+url(#spark-${…})
+url(#trend-${…})
+
+### src\pages\Appointments.tsx
+${…} · ${…} minutes
+${…} appointment${…} this week · ${…} still expected
+Agenda
+All clinicians
+appointment
+Appointment updated
+Appointments
+Book ${…} at ${…}
+Choose another week or book a new appointment.
+Clinic calendar
+Could not update appointment
+Loading the week…
+New appointment
+Next week
+No appointments in this week
+No show
+Open patient record
+Open visit
+Previous week
+Provider
+Reason for visit
+Reschedule
+Scheduling notes
+Start visit
+Today
+Week
+When
+
+### src\pages\Billing.tsx
+· collected
+/print/invoices/${…}
+${…} · ${…} outstanding. Invoices are permanent; void one to correct a mistake.
+${…} invoice${…} awaiting payment
+${…}% of billed value collected
+A clean financial trail
+Active services
+Add
+Add a service
+Add consultations, procedures and laboratory tests once, then pick them while invoicing.
+Add service
+All invoices
+All non-void invoices
+All time, excluding void invoices
+Available in the invoice builder
+Balance
+Billed to date
+Billing
+Clear filters
+Clear search
+Clinic finances
+Collected
+Collections at a glance
+Due
+Edit ${…}
+invoice
+Invoice
+Invoice actions
+Invoices
+Invoices carry a clinic-issued number, line items, tax and payments. A voided invoice keeps its number and history, so a gap in the sequence never hides a correction.
+Issued / due
+line
+Methods are recorded with each payment for reconciliation. Front desk and billing roles can take payments.
+min
+New invoice
+Newest issued first
+No services yet
+of
+Open
+Outstanding
+Outstanding balance
+Paid
+Payment methods
+Payments recorded against invoices
+Prices used to build invoices. Only active services can be selected.
+Print invoice
+Record payment
+Search invoice or patient…
+Service catalogue
+Services & prices
+Settled
+Status
+Still owed
+Total
+View invoice
+Void
+
+### src\pages\Dashboard.tsx
+/patients/${…}
+/visits/${…}
+${…} appointment${…} still to come · ${…} ${…} in the clinic right now.
+${…} completed · ${…} waiting
+${…} invoice${…} needing attention
+${…} new patient${…} this month
+A quiet calendar is a good moment to catch up on records or prepare tomorrow.
+All patients
+All visits
+Book an appointment
+Book appointment
+Check in
+Checked in
+Checked in or currently being seen
+Collected this month
+Could not check in
+Every invoice is settled.
+Follow-ups due
+Full calendar
+Future review dates from signed visits
+In the clinic
+Longest wait ${…}
+Mark as arrived
+new patient
+No draft visits left open.
+No follow-ups scheduled.
+No one is waiting. Checked-in patients will appear here.
+No patients yet.
+Nothing booked for today
+Open invoices
+Outstanding balances
+Recently registered
+Register patient
+Resume
+See
+Started
+this month
+Today’s appointments
+Today’s schedule
+Unfinished visits
+View all
+Waiting ${…}
+Waiting now
+
+### src\pages\Encounter.tsx
+. Clinical text is read-only. Record later changes as an addendum so the original note stays intact.
+. Your name and the time are recorded with the addendum.
+Add
+Add addendum
+Add an addendum
+Add diagnosis
+Addenda
+Addendum
+Addendum added
+All visits
+Allergies
+Allergy alert:
+Appended to the signed record without changing the original note.
+Assessment
+Assessment required
+at
+Back to visits
+BMI
+by
+Chief complaint
+Clinical impression
+Clinical impression and differential
+Code
+Could not add addendum
+Could not add diagnosis
+Could not remove diagnosis
+Could not save visit
+Could not save vitals
+Could not sign visit
+Description
+Diagnoses
+Diagnosis added
+Diagnosis removed
+Diastolic
+Differential
+Document the clinical assessment before signing.
+Draft saved
+Draft updated on this device.
+Examination and findings
+Examination findings, vitals, test results…
+Examination, vitals and investigations
+Follow-up
+Glucose
+Height
+History and patient report
+History, symptoms and patient report
+In the patient’s words
+It may have been removed or belongs to a workspace that is no longer connected.
+Later changes to the signed record, kept in order.
+Measurements attached to this visit.
+medication
+New information, clarification, or a change in plan since the visit was signed…
+New prescription
+No diagnoses recorded.
+No known allergies.
+No prescriptions this visit.
+Not documented.
+Objective
+Open patient record
+Plan
+Prescriptions
+Primary
+Pulse
+Recorded ${…}
+Remove diagnosis
+Resp
+Saved
+Saving…
+Secondary
+Sign & close
+Sign this clinical visit?
+Signed
+SpO₂
+Subjective
+Systolic
+Temp
+The clinical note becomes read-only and is attributed to you. Vitals and diagnoses are locked. Use an addendum for later changes.
+The original signed note remains unchanged.
+The record is now read-only. Addendums can still be added.
+This visit was signed on
+Treatment and follow-up
+Treatment, patient education, investigations, follow-up interval…
+Treatment, prescriptions, follow-up
+Unsaved changes
+Visit not found
+Visit saved
+Visit signed
+Visit type
+Vitals
+Vitals recorded
+Weight
+What the patient reports: onset, duration, severity, context…
+Working diagnosis and reasoning. Required before signing.
+
+### src\pages\Onboarding.tsx
+14 patients, appointments, completed visits and invoices. You can start from a clean database by unchecking this.
+AB12-CD34
+Add a sample clinic to explore
+Ask the clinic owner to open Settings → Connectivity → Create pairing code.
+Aster
+Aster Cloud
+Aster Cloud server
+Aster Cloud uses the same encrypted sync protocol as a local clinic network. Your data also stays on this device.
+Aster stores clinical data in an encrypted-at-rest-capable SQLite file on this computer. You are responsible for backups and access to the device.
+Australian dollar
+Back to clinic details
+Brazilian real
+Canadian dollar
+Clinic
+Clinic name
+Clinic ready
+Cloud workspace connected
+Connect to a workspace hosted on another computer in your clinic. You keep working if the network drops.
+Connect to the clinic workspace
+Connected to the clinic
+Continue
+Currency
+Dr. Maya Chen
+Egyptian pound
+Euro
+Find nearby
+Front desk
+How will you work?
+How you work
+https://192.168.1.20:47821
+https://cloud.yourprovider.com
+Indian rupee
+Join a clinic network
+Just this computer
+Let’s set up your clinic.
+No account and no network. Every record stays in a private database on this machine.
+No account required. No patient data leaves this computer unless you connect a workspace.
+Northside Family Clinic
+Nurse
+of 2
+of your clinic day.
+Owner name
+Pairing code
+Patients, appointments, visits and billing in one private workspace — built to keep working when the internet does not.
+Physician
+Pound sterling
+Runs entirely on this computer
+Sample records are clearly marked and can be removed later by starting a fresh database.
+Saudi riyal
+South African rand
+Start alone and connect later without moving your records. The same application works in every mode.
+Step
+Sync between locations through a server you or your provider run. Offline edits catch up automatically.
+The calm centre
+This computer’s name
+Time zone
+Two details are enough to begin. You can refine the address, hours and branding later in settings.
+UAE dirham
+US dollar
+Workspace address
+Workspace code
+Workspace name
+You will be recorded as the clinic owner and first clinician.
+Your clinic
+Your name
+Your name on this device
+Your role
+
+### src\pages\PatientDetail.tsx
+. Confirm before prescribing.
+· Last visit
+/visits/${…}
+${…} ${…} was removed from the active register.
+${…} clinical records
+${…} will be removed from the active register. Clinical and financial history is retained.
+Active conditions
+Active Rx
+Add allergy
+Add condition
+Address
+All
+All visits
+Allergies
+Allergy alert
+Allergy alert:
+Appointments
+Archive patient
+Archive this patient?
+at
+At a glance
+Back to patients
+Balance
+Blood pressure · last
+BMI
+Book
+Book appointment
+Book the next visit to reserve time in the clinic calendar.
+BP
+Charges, payments and outstanding balance
+Contact & coverage
+Could not archive patient
+Create an invoice after a visit to record charges and payments.
+Date of birth
+due
+Edit patient record
+Email
+Emergency contact
+Follow-up
+Insurance
+Invoices
+Issued
+It may have been archived or removed on another device.
+item
+Last recorded ${…}
+mailto:${…}
+medication
+Medication issued to this patient
+More patient actions
+New invoice
+New prescription
+New visit
+Next
+Next appointment
+No active problems recorded.
+No appointments
+No invoices
+No known allergies recorded.
+No prescriptions
+No prescriptions issued.
+No trend yet.
+No visits recorded
+No visits yet.
+Nothing booked.
+Occupation
+Overview
+Patient archived
+Patient notes
+Patient record not found
+Patient register
+Phone
+Prescriptions
+Prescriptions issued during a visit appear here, ready to print.
+Pulse
+readings
+Recent prescriptions
+Recent visits
+Registered
+Scheduled, past and cancelled
+SpO₂
+Start a visit to document the first clinical encounter.
+Start visit
+Systolic trend
+tel:${…}
+Temp
+Two or more readings will plot a trend.
+Visible to the whole care team
+Visit history
+Visits
+Vitals recorded during a visit appear here.
+Vitals trend
+Weight
+Weight trend
+
+### src\pages\Patients.tsx
+· ${…} with an open balance
+${…} ${…} remains in history but is hidden from lists.
+${…} ${…} shown · ${…} active${…}
+${…} will be removed from the active register. Their visits, prescriptions and invoices remain in the database for audit and reporting.
+Age / sex
+Archive patient
+Archive this patient?
+Balance
+Book appointment
+Clear filters
+Clear search
+Contact
+Could not archive patient
+Edit record
+inline-flex h-7 items-center rounded-[7px] px-2.5 text-[11.5px] font-medium transition ${…}
+Last visit
+Next appointment
+Not booked
+Patient actions
+Patient archived
+Patient register
+Patients
+record
+Register patient
+Search name, MRN, phone, national ID…
+Showing
+Sorted by family name
+Start a visit
+Updated live across devices
+with balances
+
+### src\pages\Prescriptions.tsx
+· printed with prescriber details and clinic footer
+/print/prescriptions/${…}
+${…} issued · ${…} active · ${…} this month. Every prescription is printable and stays attached to the patient record.
+A note on safety:
+Active prescriptions
+All
+Aster records what the prescriber entered. It does not check interactions, allergies or dosing. Always review the printed prescription against the patient’s chart before signing.
+Cancel prescription
+Cancelled
+Clear filters
+Clear search
+Completed
+Completed courses
+Could not update prescription
+Currently being taken
+Finished or stopped as planned
+Including repeats and new courses
+Issued
+Issued this month
+Mark completed
+Medication register
+Medications
+Newest first
+of
+Prescriber
+prescription
+Prescription ${…}
+Prescription actions
+Print prescription
+Reactivate
+Search patient, MRN or prescriber…
+View details
+Withdrawn before completion
+
+### src\pages\PrintInvoice.tsx
+· Invoice
+Amount
+Amount due
+Back
+Balance due
+Billed to
+Discount
+Due
+Generated
+Insurance ·
+Invoice
+Invoice preview · A4
+Issued
+License
+Note
+Paid
+Payments received
+Print invoice
+Subtotal
+Tax
+Tax ID
+Total
+Unit
+
+### src\pages\PrintPrescription.tsx
+· Aster Clinic
+· Prescription
+Back
+day
+Directions
+For
+Insurance:
+Issued ${…}
+License
+License ${…}
+Medication
+Medications
+No medications on this prescription.
+Prescriber
+Prescription
+Prescription preview · A4
+Print prescription
+Refills
+Signed ${…}
+
+### src\pages\Reports.tsx
+${…} appointment${…} booked in this period
+${…} average collected per visit
+${…} case${…}
+${…} new
+${…} no-show${…} in the same period
+${…}% of ${…} invoiced
+${…}% still to collect
+30 days
+7 days
+A measured view of activity, income and follow-through for the period you choose. Figures come from signed visits, invoices and recorded payments.
+A short, practical guide for the clinic owner
+Appointment outcomes
+are free-text descriptions recorded during visits. Standard coding can be added later without changing these reports.
+Clinic intelligence
+Clinical visits
+Clinician load
+Collected
+Collected revenue
+Collection rate
+compares the two. A persistent gap usually means unpaid balances need a follow-up call, not that clinical work is down.
+Completed means the patient was seen. No-shows are counted separately so the clinic can see the true cost of missed slots.
+counts payments recorded against invoices, not amounts billed. A busy clinic can invoice heavily and still collect slowly.
+counts visits, not hours. Use it to spot an uneven schedule before it becomes burnout.
+Custom
+daily receipts
+day
+Diagnoses
+Figures respect archived and void records.
+How the numbers fit together
+How to read this
+in view
+Last month
+Most recorded in this period
+New patients
+New registrations by month
+No appointments in this period
+No registrations recorded yet.
+Outstanding invoiced
+Patient growth
+Peak ${…} · ${…}
+Period at a glance
+Refresh
+Reports
+Signed and draft visits by provider
+The most recent six months, drawn from patient registration dates.
+This month
+This year
+to
+Today
+Top diagnoses
+Try a wider date range to see how the schedule is being used.
+
+### src\pages\Settings.tsx
+· paired
+/settings/${…}
+${…} copied
+${…} must pair again to reconnect.
+${…} on the register in total
+${…} will lose access immediately. It keeps records already downloaded, and must pair again to sync.
+48 Willow Street
+A calm, local-first clinic workspace · v
+A complete demo dataset for training and evaluation
+A joining device pins this certificate. If it ever changes, verify the new fingerprint with the clinic owner.
+A local record of connections, retries and resolved work
+A note on roles.
+A quiet accent used in the interface
+A short backup routine for a clinic
+A short line for signatures, disclaimers or contact details.
+A small, durable stack chosen for offline clinics
+AB12-CD34
+About
+Accent colour
+access
+Action
+Activity cleared
+Add a clinician so visits can be signed and appointments assigned.
+Add a team member
+Add member
+Address
+Address and code are required
+Address line 1
+Address line 2
+Appearance
+Ask the clinic owner for a pairing code. This device keeps its own database, so the clinic stays usable during a network outage.
+Ask the owner for a pairing code or workspace code.
+Aster Clinic
+Aster Clinic is an independent application. Version
+Aster records decisions; it does not diagnose, check interactions or replace professional judgement.
+Audit trail
+Auditable
+Back up now
+Backup created
+Backup failed
+Backup folder
+Backups, device access, staff accounts and applicable health-data rules remain the clinic’s responsibility.
+Built with
+By
+Can open and sign visits
+City
+CL-2024-0192
+Clear
+Clinic accent
+Clinic name
+Clinic profile
+Clinic profile saved
+Clinic software that works on the computer in front of you. Register a patient, run the visit, prescribe, bill and print without an internet connection. Connect a second room or a cloud workspace when the clinic needs it — not before.
+Clinic team
+Clinical documents
+Clinical judgement.
+Clinical records live in a SQLite database in the folder above. Aster does not send them anywhere unless you explicitly connect a workspace.
+Clinicians
+Closes
+Cloud server
+Cloud workspace created
+conflict
+Conflict resolved
+Connected computers keep their local records but can no longer sync with this one. You can start hosting again with the same database.
+Connected to the workspace
+Connectivity
+Copy address
+Copy backup folder path
+Copy database path
+Copy fingerprint
+Copy pairing code
+Could not clear activity
+Could not copy
+Could not create a pairing code
+Could not create the workspace
+Could not disconnect
+Could not join the workspace
+Could not load sample data
+Could not reach the workspace
+Could not resolve the conflict
+Could not revoke the device
+Could not start hosting
+Could not stop hosting
+Country
+Create a backup, install Aster there, and open the backup on first run. Pairing a network or cloud workspace also brings the full record set to the new device.
+Create a code when a new computer is ready to join.
+Create an Aster Cloud workspace
+Create workspace
+Currency
+Currency and time zone used for every record
+Currency symbol
+Data & backups
+Database file
+Database size
+Default tax rate %
+Device revoked
+Devices can reach ${…}
+Devices pair over the local network with a short-lived code.
+Discard changes
+Disconnect
+Disconnect and keep records
+Disconnect this device from its current workspace before making it a host.
+Disconnect this device?
+Disconnected
+Edit
+Edits are written locally first, then sent in order. If the server is unreachable, work continues and the queue drains on reconnection.
+Email
+empty
+Encryption.
+Enter a workspace address first
+Enter the Aster Cloud server address
+entries · newest first
+Every clinical and financial change is recorded here with the person and time.
+Everyone with access to a device can see the records stored on it. Roles guide the interface and the audit trail, but they are not a substitute for device security. Use separate Windows accounts on shared computers.
+Expires
+Explore the records, then replace them with your own.
+Export as JSON
+Export failed
+Export saved to
+Footers are printed below prescriptions and invoices
+For a clinic starting on a hosted server or moving from a standalone computer
+Free core
+Fri
+Front desk
+hello@northside.clinic
+Host this clinic
+Hosting is running. Other computers can join with a pairing code.
+Hosting makes this computer the source of truth for the clinic. Other computers keep a full local copy and continue working if the network drops. Starting a host ends any cloud connection on this computer.
+Hosting stopped
+How the clinic appears across the workspace and on printed documents
+https://cloud.yourprovider.com
+https://northside.clinic
+Identity
+Inactive
+Invoice footer
+Join workspace
+JSON export ready
+Keep records already on this computer
+Keep server value
+Keep this device
+Keeping records safe
+Last backup
+Last changed
+Legal name
+License / registration
+Listening on port ${…}
+Load sample data
+Load the sample clinic?
+Loads 14 patients with appointments, signed visits, prescriptions and invoices. It only works when the patient register is empty, so it cannot pollute a live clinic.
+Local changes were sent and remote changes applied.
+Local-first
+Localisation
+Merges this device’s local records into the workspace. Leave off to start from the workspace copy.
+minutes
+Mon
+Move this clinic
+Network traffic uses TLS with a pinned certificate. Data at rest is protected by the operating system account and disk encryption you enable on the computer.
+New code
+New details appear on future prescriptions and invoices.
+No account required
+No clinic profile is available yet.
+No devices have paired yet. Create a pairing code above when a computer is ready.
+No network address detected yet. Check the Windows firewall.
+No sync activity yet.
+No team members yet
+Northside Family Clinic
+Northside Family Medicine LLC
+Nurse
+Offline capable
+One code pairs one device. Share it only with clinic staff.
+Opening hours
+Opens
+Optional services, never data hostage-taking
+Owner name
+Paired devices
+Pairing code
+Pairing code ready
+Payment terms or a thank-you note.
+People with access
+Phone
+Physician
+Port
+Postal code
+Pre-filled when creating an invoice. Can be changed per invoice.
+Prescription footer
+Printed on invoices and prescriptions
+Privacy and responsibility
+Reachable addresses
+Records stay on this computer; cloud changes stop arriving.
+Refresh
+Revoke
+Revoke device
+Revoke this device?
+Revoked
+Roles determine who can prescribe, take payments and change settings.
+Sample clinic
+Sample clinic loaded
+Sat
+Save clinic profile
+Search action, person or detail…
+seen ${…}
+Select the value and copy it manually.
+Server
+Serving this clinic on port ${…}${…}
+Settings
+Shape how Aster works for your clinic. Changes to clinical and financial records are written to the audit trail.
+Slot length
+Standalone → another computer.
+Standalone → network or cloud.
+Start hosting
+Start hosting on this computer and pair the others, or create a cloud workspace above. Local records are merged, never re-keyed.
+Start hosting to see devices that pair with this workspace.
+State / region
+Stop hosting
+Stop hosting this workspace?
+Stored here.
+Suite 4
+Summary
+Sun
+Sync complete
+Sync failed
+Sync journal
+Sync now
+Take the whole workspace to another computer
+Tax ID
+Team
+Test
+Thank you for choosing Northside. Please quote the invoice number with your payment.
+The audit trail is append-only in normal use and travels with the workspace during sync. It answers who changed what, but not why — use visit notes and addenda for clinical reasoning.
+The clinic profile from this computer is copied to the new workspace. Local records are then merged into it, keeping their identifiers and history.
+The database folder also contains TLS keys and device identity.
+The database is a single SQLite file. It is yours to copy, move and archive.
+The product promise
+The same field changed on two devices. Choose which value the clinic keeps.
+This adds demonstration patients, appointments, visits and invoices to the current workspace. It is intended for empty databases and training machines only.
+This computer
+This computer is a local workspace again.
+This computer’s data
+This device
+This device becomes a standalone workspace with a full copy of its current records. Changes made elsewhere will no longer arrive.
+This prescription is valid for 30 days. Please bring it to any pharmacy.
+Thu
+Time zone
+TLS fingerprint
+Tue
+Turn this computer into the workspace server for the clinic network
+Unresolved conflicts
+Used by the appointment calendar
+Used on printed prices and summary cards.
+v
+Valid for 24 hours · ${…}
+Website
+Wed
+What Aster does and does not do
+What Aster is
+What every clinic gets
+What may be paid later
+When
+Working days
+Workspace
+Workspace address
+Workspace answered
+Workspace hosting started
+Workspace name
+You
+You are working as ${…}
+Your data is never held behind a subscription. Export and local use remain available.
+Your obligations.
+Your role
+
+### src\pages\Visits.tsx
+/visits/${…}
+${…} visit${…} on this device · ${…} draft${…} waiting to be signed
+All
+All clinicians
+Clear filters
+Clear search
+Clinical records
+Clinician
+Date
+Drafts
+Drafts are private working notes until signed. Complete the assessment before closing.
+Dx
+Review drafts
+Search patient, complaint or assessment…
+Signed
+Signed ${…}
+unfinished clinical record
+Updated ${…}
+Visit

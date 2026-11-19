@@ -1,0 +1,423 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --canvas: 242 238 230;
+  --surface: 255 253 249;
+  --elevated: 248 244 237;
+  --ink: 23 25 30;
+  --muted: 96 94 89;
+  --faint: 143 138 128;
+  --line: 226 219 208;
+  --line-strong: 205 196 182;
+  --paper: 255 253 249;
+  color-scheme: light;
+  --accent-50: 251 243 236;
+  --accent-100: 246 229 214;
+  --accent-200: 237 204 178;
+  --accent-300: 223 170 134;
+  --accent-400: 206 134 92;
+  --accent-500: 188 107 65;
+  --accent-600: 168 88 51;
+  --accent-700: 140 71 43;
+  --accent-800: 116 60 39;
+  --accent-900: 96 51 37;
+  /* Shape scale: every Tailwind radius resolves through these, so the
+     corner setting applies to buttons, fields, cards and popovers alike. */
+  --ui-radius-sm: 4px;
+  --ui-radius: 6px;
+  --ui-radius-lg: 8px;
+  --ui-radius-xl: 10px;
+  --ui-radius-2xl: 14px;
+}
+
+[data-radius="sharp"] {
+  --ui-radius-sm: 2px;
+  --ui-radius: 3px;
+  --ui-radius-lg: 4px;
+  --ui-radius-xl: 5px;
+  --ui-radius-2xl: 6px;
+}
+
+[data-radius="round"] {
+  --ui-radius-sm: 6px;
+  --ui-radius: 10px;
+  --ui-radius-lg: 14px;
+  --ui-radius-xl: 18px;
+  --ui-radius-2xl: 24px;
+}
+
+.dark {
+  --canvas: 13 15 18;
+  --surface: 24 27 32;
+  --elevated: 31 35 41;
+  --ink: 236 234 228;
+  --muted: 163 163 157;
+  --faint: 117 119 117;
+  --line: 45 51 59;
+  --line-strong: 63 71 81;
+  --paper: 24 27 32;
+  color-scheme: dark;
+}
+
+/* Accent families. Each is a full 50–900 ramp so every surface tints
+   consistently; the default copper is defined on :root above. */
+[data-accent="cobalt"] {
+  --accent-50: 242 245 250;
+  --accent-100: 228 234 244;
+  --accent-200: 201 214 232;
+  --accent-300: 162 185 213;
+  --accent-400: 118 151 187;
+  --accent-500: 87 123 161;
+  --accent-600: 69 100 135;
+  --accent-700: 58 82 111;
+  --accent-800: 52 71 95;
+  --accent-900: 47 62 81;
+}
+[data-accent="plum"] {
+  --accent-50: 248 243 249;
+  --accent-100: 240 229 242;
+  --accent-200: 227 203 231;
+  --accent-300: 206 164 212;
+  --accent-400: 180 122 188;
+  --accent-500: 153 90 159;
+  --accent-600: 130 70 132;
+  --accent-700: 108 58 109;
+  --accent-800: 90 50 91;
+  --accent-900: 75 43 76;
+}
+[data-accent="rose"] {
+  --accent-50: 253 242 244;
+  --accent-100: 251 227 231;
+  --accent-200: 247 203 212;
+  --accent-300: 240 163 180;
+  --accent-400: 230 112 141;
+  --accent-500: 217 69 105;
+  --accent-600: 196 42 84;
+  --accent-700: 165 31 70;
+  --accent-800: 137 29 63;
+  --accent-900: 117 28 58;
+}
+[data-accent="amber"] {
+  --accent-50: 251 247 237;
+  --accent-100: 246 236 212;
+  --accent-200: 236 215 166;
+  --accent-300: 223 186 112;
+  --accent-400: 208 154 69;
+  --accent-500: 189 127 43;
+  --accent-600: 162 101 34;
+  --accent-700: 132 80 31;
+  --accent-800: 110 66 32;
+  --accent-900: 92 56 32;
+}
+[data-accent="slate"] {
+  --accent-50: 244 246 248;
+  --accent-100: 231 235 239;
+  --accent-200: 207 215 223;
+  --accent-300: 173 186 199;
+  --accent-400: 132 150 168;
+  --accent-500: 100 121 142;
+  --accent-600: 79 97 117;
+  --accent-700: 65 79 95;
+  --accent-800: 57 68 80;
+  --accent-900: 51 60 70;
+}
+
+html[data-grid="off"] .paper-grid {
+  background-image: none;
+}
+
+/* Flat removes the floating shadow used by menus and sheets; borders and
+   rules still carry the hierarchy. */
+[data-elevation="flat"] .shadow-lift,
+[data-elevation="flat"] .shadow-soft,
+[data-elevation="flat"] .shadow-inset {
+  box-shadow: none;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: "Manrope Variable", "Manrope", "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+  background: rgb(var(--canvas));
+  color: rgb(var(--ink));
+  font-size: 14px;
+  line-height: 1.5;
+  font-feature-settings: "tnum" 0, "ss01" 1;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+html[lang="ar"] body,
+html[lang="ar"] h1,
+html[lang="ar"] h2,
+html[lang="ar"] h3,
+html[lang="ar"] h4 {
+  font-family: "Alexandria Variable", "Alexandria", "IBM Plex Sans Arabic", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+}
+
+/* Arabic needs a little more air, no negative tracking, and no faux casing. */
+html[lang="ar"] body {
+  line-height: 1.7;
+}
+html[lang="ar"] body,
+html[lang="ar"] body * {
+  letter-spacing: 0 !important;
+}
+html[lang="ar"] h1,
+html[lang="ar"] h2,
+html[lang="ar"] h3,
+html[lang="ar"] h4 {
+  font-weight: 600;
+  line-height: 1.5;
+}
+html[lang="ar"] .field-label,
+html[lang="ar"] .quiet-label,
+html[lang="ar"] .eyebrow,
+html[lang="ar"] .table-head {
+  font-size: 12px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+html[lang="ar"] .uppercase {
+  text-transform: none;
+}
+html[lang="ar"] input,
+html[lang="ar"] textarea,
+html[lang="ar"] select {
+  font-family: "Alexandria Variable", "Alexandria", "IBM Plex Sans Arabic", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: "Manrope Variable", "Manrope", "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+  letter-spacing: -0.022em;
+}
+
+::selection {
+  background: rgb(var(--accent-500) / 0.24);
+}
+
+/* Wails frameless drag regions */
+.wails-drag {
+  --wails-draggable: drag;
+}
+.wails-no-drag {
+  --wails-draggable: no-drag;
+}
+
+/* Scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--faint) / 0.45) transparent;
+}
+*::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+*::-webkit-scrollbar-thumb {
+  background: rgb(var(--faint) / 0.35);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--faint) / 0.55);
+  background-clip: content-box;
+}
+
+@layer components {
+  .field-label {
+    @apply mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.14em] text-muted;
+  }
+  .input {
+    @apply h-10 w-full rounded-lg border border-line bg-surface px-3 text-[13px] text-ink outline-none transition placeholder:text-faint hover:border-line-strong focus:border-accent-500 focus:ring-2 focus:ring-accent-500/15 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+  .textarea {
+    @apply input h-auto min-h-[96px] resize-y py-2.5 leading-relaxed;
+  }
+  .select {
+    @apply input appearance-none bg-no-repeat pe-8;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23605e59' stroke-width='2.4' stroke-linecap='round'><path d='m6 9 6 6 6-6'/></svg>");
+    background-position: right 10px center;
+  }
+  [dir="rtl"] .select {
+    background-position: left 10px center;
+  }
+  .card {
+    @apply rounded-xl border border-line bg-surface;
+  }
+  .quiet-label {
+    @apply text-[10px] font-semibold uppercase tracking-[0.14em] text-faint;
+  }
+  .eyebrow {
+    @apply text-[10px] font-semibold uppercase tracking-[0.18em] text-accent-700 dark:text-accent-300;
+  }
+  .divider {
+    @apply h-px w-full bg-line;
+  }
+  .link {
+    @apply text-brand-700 underline-offset-2 hover:underline dark:text-brand-300;
+  }
+  .table-head {
+    @apply text-start text-[9.5px] font-semibold uppercase tracking-[0.14em] text-faint;
+  }
+  .stat-value {
+    @apply tabular-nums tracking-[-0.045em];
+  }
+}
+
+html[lang="ar"] .badge {
+  font-size: 11px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* A faint drafting grid; it gives the paper canvas depth without decoration. */
+.paper-grid {
+  background-image: radial-gradient(rgb(var(--ink) / 0.055) 0.8px, transparent 0.8px);
+  background-size: 22px 22px;
+  background-position: -11px -11px;
+}
+.dark .paper-grid {
+  background-image: radial-gradient(rgb(255 255 255 / 0.05) 0.8px, transparent 0.8px);
+}
+
+/* Hairline grid: a bordered block whose children are separated by 1px rules. */
+.rule-grid {
+  background: rgb(var(--line));
+}
+.rule-grid > * {
+  background: rgb(var(--surface));
+}
+
+/* The ink spine used by the title bar and sidebar. */
+.ink-spine {
+  background:
+    radial-gradient(120% 80% at 100% 0%, rgb(255 255 255 / 0.035) 0%, transparent 62%),
+    linear-gradient(180deg, #131b24 0%, #0e151d 100%);
+}
+
+/* Mirror the few physical utilities that remain in the component tree. */
+[dir="rtl"] .text-left {
+  text-align: right;
+}
+[dir="rtl"] .text-right {
+  text-align: left;
+}
+
+/* Direction-bearing icons should point along the reading direction. */
+[dir="rtl"] .lucide-arrow-right,
+[dir="rtl"] .lucide-arrow-left,
+[dir="rtl"] .lucide-chevron-right,
+[dir="rtl"] .lucide-chevron-left,
+[dir="rtl"] .lucide-circle-arrow-right,
+[dir="rtl"] .lucide-circle-arrow-left,
+[dir="rtl"] .lucide-corner-down-right,
+[dir="rtl"] .lucide-corner-down-left {
+  transform: scaleX(-1);
+}
+
+/* Phone numbers, emails and dates stay legible left-to-right inside Arabic. */
+[dir="rtl"] input[type="email"],
+[dir="rtl"] input[type="tel"],
+[dir="rtl"] input[type="url"],
+[dir="rtl"] input[type="number"],
+[dir="rtl"] input[type="date"],
+[dir="rtl"] input[type="time"],
+[dir="rtl"] input[type="datetime-local"],
+[dir="rtl"] .dir-ltr {
+  direction: ltr;
+  text-align: start;
+}
+[dir="rtl"] .font-mono {
+  direction: ltr;
+  text-align: start;
+}
+
+/* Bidi-safe free text: Arabic runs right, numbers and Latin runs stay intact. */
+input,
+textarea {
+  unicode-bidi: plaintext;
+}
+
+/* Typographic rhythm in long clinical text */
+.prose-note {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Keyboard focus: a precise accent outline, never a glow. */
+:focus-visible {
+  outline: 2px solid rgb(var(--accent-600) / 0.8);
+  outline-offset: 2px;
+}
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none;
+}
+
+/* Side sheets: the panel enters from the inline end of the window. */
+@keyframes sheet-in {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+@keyframes sheet-in-rtl {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+@keyframes overlay-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.sheet-overlay {
+  animation: overlay-in 0.2s ease-out both;
+}
+.sheet-panel {
+  animation: sheet-in 0.34s cubic-bezier(0.22, 0.8, 0.2, 1) both;
+}
+[dir="rtl"] .sheet-panel {
+  animation-name: sheet-in-rtl;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sheet-overlay,
+  .sheet-panel {
+    animation: none;
+  }
+}
+
+@media print {
+  html,
+  body,
+  #root {
+    height: auto !important;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-sheet {
+    box-shadow: none !important;
+    border: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+  }
+  @page {
+    margin: 14mm;
+  }
+}

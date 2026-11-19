@@ -1,0 +1,86 @@
+src\components\BillingDialogs.tsx:192  `Unit (${clinic?.currency_symbol ?? '$'})`
+src\components\BillingDialogs.tsx:210  `Applied before tax. Subtotal ${money(subtotal, clinic?.currency_symbol)}.`
+src\components\BillingDialogs.tsx:310  `${invoice.number} ┬╖ balance ${money(balance, clinic?.currency_symbol)}`
+src\components\BillingDialogs.tsx:323  `Amount (${clinic?.currency_symbol ?? '$'})`
+src\components\charts.tsx:25  `0 0 ${width} ${height}`
+src\components\charts.tsx:79  `0 0 ${width} ${height}`
+src\components\charts.tsx:119  `${p.label}: ${format(p.value)}`
+src\components\charts.tsx:148  `${Math.max(2, (item.value / max) * 100)}%`
+src\components\charts.tsx:173  `0 0 ${size} ${size}`
+src\components\charts.tsx:188  `${Math.max(0, dash - 2)} ${circumference - dash + 2}`
+src\components\charts.tsx:223  `${Math.max(8, (v / max) * 100)}%`
+src\components\CommandPalette.tsx:171  ` ┬╖ ${p.phone}`
+src\components\InvoiceDetailModal.tsx:57  `${invoice.first_name} ${invoice.last_name} ┬╖ ${invoice.mrn}`
+src\components\PatientPicker.tsx:66  ` ┬╖ ${selected.phone}`
+src\components\PatientPicker.tsx:120  ` ┬╖ ${p.phone}`
+src\components\PrescriptionDetailModal.tsx:42  `Prescription ┬╖ ${rx.first_name} ${rx.last_name}`
+src\components\PrescriptionDetailModal.tsx:43  `Issued ${fmtDateTime(rx.issued_at)} by ${rx.provider_name || 'the care team'}`
+src\components\PrescriptionDetailModal.tsx:96  `${item.duration_days} days`
+src\components\PrescriptionDetailModal.tsx:96  `┬╖ ${item.instructions}`
+src\components\StaffDialog.tsx:207  `Use colour ${c}`
+src\components\StaffDialog.tsx:214  `${roleLabel(form.role)} can be selected for appointments and visits.`
+src\pages\Appointments.tsx:82  `${appointment.first_name} ${appointment.last_name}`
+src\pages\Appointments.tsx:83  `${fmtDateTime(appointment.start_at)} ┬╖ ${duration} minutes`
+src\pages\Appointments.tsx:99  `${appointment.first_name} ${appointment.last_name}`
+src\pages\Appointments.tsx:102  ` ┬╖ ${appointment.phone}`
+src\pages\Appointments.tsx:250  `${sorted.length} appointment${sorted.length === 1 ? '' : 's'} this week ┬╖ ${awaiting} still expected`
+src\pages\Appointments.tsx:323  `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`
+src\pages\Appointments.tsx:326  `Book ${format(day, 'EEEE')} at ${clockLabel(m)}`
+src\pages\Appointments.tsx:356  `${fmtTime(appt.start_at)} ${appt.first_name} ${appt.last_name} ΓÇö ${appt.reason}`
+src\pages\Appointments.tsx:402  `${appt.first_name} ${appt.last_name}`
+src\pages\Appointments.tsx:405  ` ┬╖ ${appt.room}`
+src\pages\Billing.tsx:133  `${plural(counts.open, 'open invoice')} ┬╖ ${money(totals.outstanding, clinic?.currency_symbol)} outstanding. Invoices are permanent; void one to correct a mistake.`
+src\pages\Billing.tsx:144  `${counts.open} invoice${counts.open === 1 ? '' : 's'} awaiting payment`
+src\pages\Billing.tsx:368  ` ┬╖ ${svc.description}`
+src\pages\Billing.tsx:372  `Edit ${svc.name}`
+src\pages\Billing.tsx:404  `${totals.billed > 0 ? Math.min(100, (totals.collected / totals.billed) * 100) : 0}%`
+src\pages\Billing.tsx:408  `${Math.round((totals.collected / totals.billed) * 100)}% of billed value collected`
+src\pages\Dashboard.tsx:76  `${appt.first_name ?? ''} ${appt.last_name ?? ''}`
+src\pages\Dashboard.tsx:163  `${remaining} appointment${remaining === 1 ? '' : 's'} still to come ┬╖ ${waiting.length} ${waiting.length === 1 ? 'person' : 'people'} in the clinic right now.`
+src\pages\Dashboard.tsx:177  `${completed} completed ┬╖ ${waiting.length} waiting`
+src\pages\Dashboard.tsx:184  `Longest wait ${waiting[0]?.checked_in_at ? fromNow(waiting[0].checked_in_at).replace(' ago', '') : 'just now'}`
+src\pages\Dashboard.tsx:191  `${totals.new_patients_month ?? 0} new patient${(totals.new_patients_month ?? 0) === 1 ? '' : 's'} this month`
+src\pages\Dashboard.tsx:198  `${(totals.unpaid ?? []).length} invoice${(totals.unpaid ?? []).length === 1 ? '' : 's'} needing attention`
+src\pages\Dashboard.tsx:273  `Waiting ${a.checked_in_at ? fromNow(a.checked_in_at).replace(' ago', '') : 'now'}`
+src\pages\Encounter.tsx:344  `${a.allergen} (${a.severity}${a.reaction ? ` ΓÇö ${a.reaction}` : ''})`
+src\pages\Encounter.tsx:344  ` ΓÇö ${a.reaction}`
+src\pages\Encounter.tsx:476  `Recorded ${fmtDate(data.vitals.measured_at, 'd MMM, HH:mm')}`
+src\pages\Login.tsx:270  ` ┬╖ @${member.username}`
+src\pages\Onboarding.tsx:435  `${h.secure ? 'https' : 'http'}://${h.address}:${h.port}`
+src\pages\PatientDetail.tsx:204  `${a.allergen} (${a.severity}${a.reaction ? ` ΓÇö ${a.reaction}` : ''})`
+src\pages\PatientDetail.tsx:204  ` ΓÇö ${a.reaction}`
+src\pages\PatientDetail.tsx:224  `Last recorded ${fmtDateTime(latestVitals.measured_at)}`
+src\pages\PatientDetail.tsx:230  `${latestVitals.systolic ?? 'ΓÇö'}/${latestVitals.diastolic ?? 'ΓÇö'}`
+src\pages\PatientDetail.tsx:312  `${data?.encounters?.length ?? 0} clinical records`
+src\pages\PatientDetail.tsx:413  ` ┬╖ ${a.room}`
+src\pages\PatientDetail.tsx:478  ` ┬╖ ${fmtDate(c.diagnosed_on, 'MMM yyyy')}`
+src\pages\PatientDetail.tsx:490  `${fmtDate(patient.date_of_birth)} (${age(patient.date_of_birth)})`
+src\pages\PatientDetail.tsx:491  `${patient.emergency_contact_name} ┬╖ ${patient.emergency_contact_phone}`
+src\pages\PatientDetail.tsx:492  `${patient.insurance_provider} ┬╖ ${patient.insurance_number}`
+src\pages\PatientDetail.tsx:515  `${patientName(patient)} will be removed from the active register. Clinical and financial history is retained.`
+src\pages\Patients.tsx:255  `${patientName(archive)} will be removed from the active register. Their visits, prescriptions and invoices remain in the database for audit and reporting.`
+src\pages\Prescriptions.tsx:90  `${prescriptions.length} issued ┬╖ ${activeCount} active ┬╖ ${thisMonth} this month. Every prescription is printable and stays attached to the patient record.`
+src\pages\PrintInvoice.tsx:143  ` ┬╖ ${p.reference}`
+src\pages\PrintPrescription.tsx:80  `License ${provider.license_number}`
+src\pages\PrintPrescription.tsx:115  ` ┬╖ ${item.frequency}`
+src\pages\PrintPrescription.tsx:145  `Signed ${fmtDate(rx.signed_at)}`
+src\pages\PrintPrescription.tsx:145  `Issued ${fmtDate(rx.issued_at)}`
+src\pages\Reports.tsx:226  `${collectionRate}% of ${money(invoiced, clinic?.currency_symbol)} invoiced`
+src\pages\Reports.tsx:233  `${100 - collectionRate}% still to collect`
+src\pages\Reports.tsx:240  `${money(averageVisit, clinic?.currency_symbol)} average collected per visit`
+src\pages\Reports.tsx:247  `${Number(data?.no_shows ?? 0)} no-show${Number(data?.no_shows ?? 0) === 1 ? '' : 's'} in the same period`
+src\pages\Reports.tsx:256  `Peak ${peak.label} ┬╖ ${money(peak.value, clinic?.currency_symbol)}`
+src\pages\Reports.tsx:266  `${totalAppointments} appointment${totalAppointments === 1 ? '' : 's'} booked in this period`
+src\pages\Reports.tsx:300  `${n} case${n === 1 ? '' : 's'}`
+src\pages\Reports.tsx:310  `${n} new`
+src\pages\Settings.tsx:851  `${staff.length} on the register in total`
+src\pages\Settings.tsx:853  `You are working as ${currentStaff.full_name}`
+src\pages\Settings.tsx:1159  `Serving this clinic on port ${host.port}${host.urls?.[0] ? ` ┬╖ ${host.urls[0]}` : ''}`
+src\pages\Settings.tsx:1159  ` ┬╖ ${host.urls[0]}`
+src\pages\Settings.tsx:1160  `${data.workspace || clinic?.name || 'Workspace'} ┬╖ ${data.serverUrl || sync.serverUrl || 'server configured'}`
+src\pages\Settings.tsx:1376  `${titleCase(c.entity)} ┬╖ ${c.entity_id.slice(0, 8)}`
+src\pages\Settings.tsx:1426  `seen ${fromNow(device.lastSeenAt)}`
+src\pages\Settings.tsx:1486  `${revokeTarget.name} will lose access immediately. It keeps records already downloaded, and must pair again to sync.`
+src\pages\Visits.tsx:59  `${encounters.length} visit${encounters.length === 1 ? '' : 's'} on this device ┬╖ ${drafts.length} draft${drafts.length === 1 ? '' : 's'} waiting to be signed`
+src\pages\Visits.tsx:166  `Signed ${fromNow(e.signed_at)}`
+src\pages\Visits.tsx:166  `Updated ${fromNow(e.updated_at ?? e.started_at)}`

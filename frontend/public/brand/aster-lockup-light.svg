@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 88" role="img" aria-label="Aster Clinic">
+  <rect width="64" height="64" x="12" y="12" rx="16" fill="#f7f4ef"/>
+  <g stroke="#1d2833" stroke-width="4.6" stroke-linecap="round">
+    <path d="M44 25.5v37"/>
+    <path d="M25.5 44h37"/>
+    <path d="M30.9 30.9 57.1 57.1"/>
+    <path d="M57.1 30.9 30.9 57.1"/>
+  </g>
+  <circle cx="44" cy="44" r="4" fill="#a85833"/>
+  <circle cx="44" cy="44" r="1.7" fill="#d9a06f"/>
+  <text x="94" y="50" fill="#f7f4ef" font-family="Manrope, 'Segoe UI', sans-serif" font-size="34" font-weight="650" letter-spacing="-1">Aster</text>
+  <text x="94" y="70" fill="#d9a06f" font-family="Manrope, 'Segoe UI', sans-serif" font-size="12" font-weight="700" letter-spacing="4.4">CLINIC</text>
+</svg>
