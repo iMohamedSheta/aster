@@ -60,6 +60,8 @@ var Entities = map[string]string{
 	"treatment_plan_items": "treatment_plan_items",
 	"inventory_items":      "inventory_items",
 	"expenses":             "expenses",
+	"staff_pay":            "staff_pay",
+	"payroll_entries":      "payroll_entries",
 	"audit_logs":           "audit_logs",
 }
 
@@ -77,6 +79,7 @@ var BillingEntities = map[string]bool{
 
 var AdminEntities = map[string]bool{
 	"staff": true, "clinics": true, "inventory_items": true,
+	"staff_pay": true, "payroll_entries": true,
 }
 
 // Metadata columns are managed by the store, never accepted from clients.
@@ -759,18 +762,33 @@ func equalValue(a, b any) bool {
 
 // Archive soft-deletes a record. Clinical records cannot be archived.
 func (s *Store) Archive(entity, id string, audit *Audit) error {
+	tx := s.db.MustBegin()
+	if err := s.archiveInTx(tx, entity, id, audit); err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+	s.emit(entity, id)
+	return nil
+}
+
+// archiveInTx mirrors Archive but works inside a caller-owned transaction.
+func (s *Store) archiveInTx(tx *sqlx.Tx, entity, id string, audit *Audit) error {
 	info, table, err := s.table(entity)
 	if err != nil {
 		return err
 	}
 	_ = info
+	// Take the revision before the transaction reads: nextRev writes the clock
+	// through the pool, and doing that after a read would leave the transaction
+	// with a stale WAL snapshot (SQLITE_BUSY_SNAPSHOT on its first write).
 	rev := s.nextRev()
 	nowS := revTime(rev)
 
-	tx := s.db.MustBegin()
 	old, err := s.rowMapTx(tx, table, id)
 	if err != nil {
-		tx.Rollback()
 		return err
 	}
 	revs := decodeRevs(fmt.Sprint(old["field_revs"]))
@@ -778,23 +796,16 @@ func (s *Store) Archive(entity, id string, audit *Audit) error {
 	revJSON, _ := json.Marshal(revs)
 	if _, err := tx.Exec(fmt.Sprintf("UPDATE %q SET deleted_at=?, updated_at=?, rev=?, field_revs=?, origin_node=? WHERE id=?", table),
 		nowS, nowS, rev, string(revJSON), s.node, id); err != nil {
-		tx.Rollback()
 		return err
 	}
 	if err := s.recordLocalTx(tx, entity, id, map[string]any{}, true, rev); err != nil {
-		tx.Rollback()
 		return err
 	}
 	if audit != nil {
 		if err := s.writeAuditTx(tx, audit, entity, id); err != nil {
-			tx.Rollback()
 			return err
 		}
 	}
-	if err := tx.Commit(); err != nil {
-		return err
-	}
-	s.emit(entity, id)
 	return nil
 }
 

@@ -550,6 +550,55 @@ CREATE TABLE IF NOT EXISTS expenses (
 CREATE INDEX IF NOT EXISTS idx_expenses_date ON expenses(clinic_id, spent_on, deleted_at);
 CREATE INDEX IF NOT EXISTS idx_expenses_location ON expenses(clinic_id, location_id, spent_on);
 
+-- Salary defaults per team member. Kept apart from the staff row so payroll
+-- figures can be restricted to the clinic manager.
+CREATE TABLE IF NOT EXISTS staff_pay (
+  id TEXT PRIMARY KEY,
+  clinic_id TEXT NOT NULL,
+  location_id TEXT NOT NULL DEFAULT '',
+  staff_id TEXT NOT NULL DEFAULT '',
+  base_cents INTEGER NOT NULL DEFAULT 0,
+  allowances_cents INTEGER NOT NULL DEFAULT 0,
+  deductions_cents INTEGER NOT NULL DEFAULT 0,
+  notes TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL DEFAULT '',
+  updated_at TEXT NOT NULL DEFAULT '',
+  rev TEXT NOT NULL DEFAULT '',
+  field_revs TEXT NOT NULL DEFAULT '{}',
+  deleted_at TEXT,
+  origin_node TEXT NOT NULL DEFAULT ''
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_staff_pay_member ON staff_pay(clinic_id, staff_id) WHERE deleted_at IS NULL;
+
+-- One payroll line per team member per month. Paying a line records a salary
+-- expense and links the two records, so finance reports stay complete.
+CREATE TABLE IF NOT EXISTS payroll_entries (
+  id TEXT PRIMARY KEY,
+  clinic_id TEXT NOT NULL,
+  location_id TEXT NOT NULL DEFAULT '',
+  staff_id TEXT NOT NULL DEFAULT '',
+  period TEXT NOT NULL DEFAULT '',
+  base_cents INTEGER NOT NULL DEFAULT 0,
+  allowances_cents INTEGER NOT NULL DEFAULT 0,
+  deductions_cents INTEGER NOT NULL DEFAULT 0,
+  net_cents INTEGER NOT NULL DEFAULT 0,
+  status TEXT NOT NULL DEFAULT 'draft',
+  paid_on TEXT NOT NULL DEFAULT '',
+  method TEXT NOT NULL DEFAULT '',
+  reference TEXT NOT NULL DEFAULT '',
+  notes TEXT NOT NULL DEFAULT '',
+  expense_id TEXT NOT NULL DEFAULT '',
+  created_by TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL DEFAULT '',
+  updated_at TEXT NOT NULL DEFAULT '',
+  rev TEXT NOT NULL DEFAULT '',
+  field_revs TEXT NOT NULL DEFAULT '{}',
+  deleted_at TEXT,
+  origin_node TEXT NOT NULL DEFAULT ''
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_payroll_member_period ON payroll_entries(clinic_id, staff_id, period) WHERE deleted_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_payroll_period ON payroll_entries(clinic_id, period, deleted_at);
+
 CREATE TABLE IF NOT EXISTS patient_files (
   id TEXT PRIMARY KEY,
   clinic_id TEXT NOT NULL,

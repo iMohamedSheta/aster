@@ -1,8 +1,8 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
   BarChart3, Boxes, Building2, CalendarDays, CheckSquare2, ChevronsUpDown, CircleHelp, ClipboardList,
-  FolderOpen, LayoutDashboard, LogOut, Palette, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Pill,
-  Plus, ReceiptText, Settings2, Stethoscope, Users, Wallet,
+  FolderOpen, HandCoins, LayoutDashboard, LogOut, Palette, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Pill,
+  Plus, ReceiptText, Settings2, Stethoscope, Tag, Users, Wallet,
 } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { api } from '../lib/api'
@@ -15,7 +15,7 @@ import { AsterMark } from './Logo'
 
 const groups: {
   label: string
-  items: { to: string; label: string; icon: any; end?: boolean }[]
+  items: { to: string; label: string; icon: any; end?: boolean; ownerOnly?: boolean }[]
 }[] = [
   {
     label: 'Workspace',
@@ -39,7 +39,9 @@ const groups: {
     label: 'Finance',
     items: [
       { to: '/billing', label: 'Billing', icon: ReceiptText },
+      { to: '/services', label: 'Services', icon: Tag },
       { to: '/expenses', label: 'Expenses', icon: Wallet },
+      { to: '/payroll', label: 'Payroll', icon: HandCoins, ownerOnly: true },
       { to: '/reports', label: 'Reports', icon: BarChart3 },
     ],
   },
@@ -69,6 +71,7 @@ export function Sidebar() {
   const qc = useQueryClient()
   const { isRTL } = useLocale()
   const compact = sidebar === 'compact'
+  const isOwner = currentStaff?.role === 'owner'
   const CollapseIcon = isRTL ? PanelRightClose : PanelLeftClose
   const ExpandIcon = isRTL ? PanelRightOpen : PanelLeftOpen
   const ToggleIcon = compact ? ExpandIcon : CollapseIcon
@@ -137,6 +140,10 @@ export function Sidebar() {
     </>
   )
 
+  const visibleGroups = groups
+    .map((group) => ({ ...group, items: group.items.filter((item) => !item.ownerOnly || isOwner) }))
+    .filter((group) => group.items.length > 0)
+
   return (
     <aside
       className={cn(
@@ -199,7 +206,7 @@ export function Sidebar() {
       <div className={cn('h-px bg-line', compact ? 'mx-2' : 'mx-3')} />
 
       <nav className={cn('flex-1 overflow-y-auto py-4', compact ? 'px-2' : 'px-2.5')}>
-        {groups.map((group, index) => (
+        {visibleGroups.map((group, index) => (
           <div key={group.label} className={cn(compact ? 'mb-1 last:mb-0' : 'mb-5 last:mb-0')}>
             {compact ? (
               index > 0 && <div className="mx-auto mb-1.5 mt-2 h-px w-6 bg-line" />

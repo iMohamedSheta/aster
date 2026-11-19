@@ -1,8 +1,8 @@
 import type {
   Appointment, BootstrapData, Clinic, ClinicLocation, ClinicTask, DashboardData, DataInfo, DeviceRow,
   Encounter, EncounterDetailData, Expense, HostStatus, InventoryItem, Invoice, NetworkOverview, Patient,
-  PatientDetailData, PatientFile, Prescription, ReportData, Service, Staff, SyncActivityRow, SyncStatus,
-  TreatmentPlan, TreatmentPlanDetailData,
+  PatientDetailData, PatientFile, PayrollBoard, PayrollRow, Prescription, ReportData, Service, Staff,
+  SyncActivityRow, SyncStatus, TreatmentPlan, TreatmentPlanDetailData, UpdateState,
 } from './types'
 
 declare global {
@@ -143,6 +143,24 @@ export const api = {
   dataInformation: () => call<DataInfo>('DataInformation'),
   backupNow: () => call<DataInfo>('BackupNow'),
   exportJSON: () => call<{ path: string }>('ExportJSON'),
+
+  payroll: (period: string, locationId = '') => call<PayrollBoard>('PayrollBoard', period, locationId),
+  saveStaffPay: (staffId: string, baseCents: number, allowancesCents: number, deductionsCents: number, notes = '') =>
+    call<any>('SaveStaffPay', staffId, baseCents, allowancesCents, deductionsCents, notes),
+  generatePayroll: (period: string, locationId = '') => call<PayrollBoard>('GeneratePayroll', period, locationId),
+  savePayrollEntry: (fields: any) => call<PayrollRow>('SavePayrollEntry', fields),
+  payPayrollEntry: (id: string, method: string, reference: string, paidOn: string) =>
+    call<PayrollRow>('PayPayrollEntry', id, method, reference, paidOn),
+  unpayPayrollEntry: (id: string) => call<PayrollRow>('UnpayPayrollEntry', id),
+  deletePayrollEntry: (id: string) => call<void>('DeletePayrollEntry', id),
+
+  updateState: () => call<UpdateState>('UpdateState'),
+  checkForUpdates: (manual = true) => call<UpdateState>('CheckForUpdates', manual),
+  downloadUpdate: () => call<UpdateState>('DownloadUpdate'),
+  installUpdate: () => call<UpdateState>('InstallUpdate'),
+  setAutoUpdate: (enabled: boolean) => call<UpdateState>('SetAutoUpdate', enabled),
+  skipUpdate: (version: string) => call<UpdateState>('SkipUpdate', version),
+  clearSkippedUpdate: () => call<UpdateState>('ClearSkippedUpdate'),
 }
 
 export function onEvent(name: string, cb: (data: any) => void): () => void {

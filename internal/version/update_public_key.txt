@@ -1,0 +1,7 @@
+# Ed25519 public key for update manifests (base64).
+# Generate a key pair with:
+#   go run ./cmd/releasectl keygen
+# Then commit the public key printed by that command here and add the private
+# key as the UPDATE_SIGNING_KEY GitHub Actions secret.
+#
+# Leave empty for development builds. Release builds require a key.

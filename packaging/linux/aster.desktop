@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Aster
+GenericName=Clinic workspace
+Comment=Local-first clinic workspace for records, visits and billing
+Exec=aster
+Icon=aster
+Terminal=false
+Categories=Office;MedicalSoftware;
+StartupWMClass=Aster

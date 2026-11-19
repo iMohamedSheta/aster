@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleName</key>
+    <string>Aster</string>
+    <key>CFBundleDisplayName</key>
+    <string>Aster</string>
+    <key>CFBundleExecutable</key>
+    <string>{{.OutputFilename}}</string>
+    <key>CFBundleIdentifier</key>
+    <string>app.aster.clinic</string>
+    <key>CFBundleVersion</key>
+    <string>{{.Info.ProductVersion}}</string>
+    <key>CFBundleShortVersionString</key>
+    <string>{{.Info.ProductVersion}}</string>
+    <key>CFBundleGetInfoString</key>
+    <string>Aster Clinic</string>
+    <key>CFBundleIconFile</key>
+    <string>iconfile</string>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>en</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>11.0</string>
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.medical</string>
+    <key>NSHighResolutionCapable</key>
+    <string>true</string>
+    <key>NSHumanReadableCopyright</key>
+    <string>Aster Clinic</string>
+    <key>NSSupportsAutomaticGraphicsSwitching</key>
+    <true/>
+</dict>
+</plist>

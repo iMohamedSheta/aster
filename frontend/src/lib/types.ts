@@ -173,6 +173,50 @@ export interface Expense {
   [key: string]: any
 }
 
+export interface PayrollRow {
+  staff_id: string
+  entry_id: string
+  profile_id: string
+  full_name: string
+  role: string
+  title: string
+  location_id: string
+  location_name: string
+  base_cents: number
+  allowances_cents: number
+  deductions_cents: number
+  net_cents: number
+  status: 'draft' | 'paid' | 'not_generated' | string
+  paid_on: string
+  method: string
+  reference: string
+  notes: string
+  profile_notes: string
+  expense_id: string
+  has_salary: boolean
+  entry_created_at: string
+  [key: string]: any
+}
+
+export interface PayrollTotals {
+  staff_count: number
+  salaried_count: number
+  entry_count: number
+  paid_count: number
+  draft_count: number
+  net_cents: number
+  paid_cents: number
+  outstanding_cents: number
+}
+
+export interface PayrollBoard {
+  period: string
+  rows: PayrollRow[]
+  periods: string[]
+  totals: PayrollTotals
+  generated: number
+}
+
 export interface Staff {
   id: string
   full_name: string
@@ -585,4 +629,36 @@ export interface NetworkOverview {
   trend: { day: string; cents: number }[]
   range_start: string
   range_end: string
+}
+
+export type UpdateStatus =
+  | 'idle'
+  | 'checking'
+  | 'available'
+  | 'downloading'
+  | 'ready'
+  | 'installing'
+  | 'up-to-date'
+  | 'error'
+  | 'unsupported'
+  | string
+
+export interface UpdateState {
+  status: UpdateStatus
+  currentVersion: string
+  latestVersion: string
+  notesUrl: string
+  publishedAt: string
+  assetName: string
+  assetSize: number
+  downloaded: number
+  progress: number
+  message: string
+  error: string
+  checkedAt: string
+  autoCheck: boolean
+  skipped: boolean
+  verified: boolean
+  justUpdatedFrom: string
+  platform: string
 }

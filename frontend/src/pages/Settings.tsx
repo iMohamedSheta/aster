@@ -2,15 +2,17 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
-  Activity, Ban, Check, CheckCircle2, Cloud, Copy, Database, FileJson, FolderOpen,
+  Activity, ArrowDownToLine, Ban, Check, CheckCircle2, Cloud, Copy, Database, ExternalLink, FileJson, FolderOpen,
   HardDrive, HeartPulse, Info, KeyRound, Laptop, Lock, Mail, Monitor, Moon, Network, Palette, Pencil, Phone,
-  Plus, RefreshCw, Save, Search, Server, ShieldCheck, Sun, Trash2, TriangleAlert,
+  Plus, RefreshCw, RotateCcw, Save, Search, Server, ShieldCheck, Sun, Trash2, TriangleAlert,
   Unplug, UserPlus, Users, Wifi,
 } from 'lucide-react'
 import { api } from '../lib/api'
 import { roleLabel, useApp, useIsOwner } from '../lib/AppContext'
 import { useLocale } from '../lib/LocaleContext'
 import { translate } from '../lib/i18n'
+import { useUpdate } from '../lib/UpdateContext'
+import { updateStatusLabel, updateStatusTone } from '../lib/updates'
 import { ACCENTS, accentSwatch, DEFAULT_APPEARANCE, ELEVATIONS, RADII, SIDEBARS, type AccentId } from '../lib/appearance'
 import {
   bytes, cn, fmtDate, fmtDateTime, fromNow, titleCase,
@@ -1696,6 +1698,114 @@ function AuditTab() {
 /* About                                                               */
 /* ------------------------------------------------------------------ */
 
+function UpdatesCard() {
+  const { state, busy, openDialog, check, download, install, setAutoCheck, clearSkip } = useUpdate()
+  const status = state?.status || 'idle'
+  const latest = state?.latestVersion || ''
+  const available = status === 'available'
+  const ready = status === 'ready'
+  const downloading = status === 'downloading'
+
+  return (
+    <SectionCard
+      title="Application updates"
+      subtitle="Signed desktop releases delivered through GitHub"
+      actions={<Badge tone={updateStatusTone(status)}>{translate(updateStatusLabel(status))}</Badge>}
+    >
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div>
+          <div className="text-[9.5px] font-semibold uppercase tracking-[0.08em] text-faint">{translate('Installed version')}</div>
+          <div className="mt-1 font-mono text-[12px] font-semibold text-ink">v{state?.currentVersion || '—'}</div>
+        </div>
+        <div>
+          <div className="text-[9.5px] font-semibold uppercase tracking-[0.08em] text-faint">{translate('Latest release')}</div>
+          <div className="mt-1 font-mono text-[12px] font-semibold text-ink">{latest ? `v${latest}` : '—'}</div>
+        </div>
+        <div>
+          <div className="text-[9.5px] font-semibold uppercase tracking-[0.08em] text-faint">{translate('Last checked')}</div>
+          <div className="mt-1 text-[11.5px] text-ink">{state?.checkedAt ? fromNow(state.checkedAt) : translate('Not checked yet')}</div>
+        </div>
+        <div>
+          <div className="text-[9.5px] font-semibold uppercase tracking-[0.08em] text-faint">{translate('This computer')}</div>
+          <div className="mt-1 font-mono text-[11.5px] text-ink">{state?.platform || '—'}</div>
+        </div>
+      </div>
+
+      {available && (
+        <div className="mt-3 rounded-lg border border-accent-200 bg-accent-50/60 px-3 py-2.5 text-[11.5px] leading-5 dark:border-accent-800 dark:bg-accent-900/15">
+          <span className="font-semibold text-ink">{translate(`Version ${latest} is available`)}</span>
+          <span className="text-muted"> · {bytes(state?.assetSize || 0)}</span>
+          {state?.verified && (
+            <span className="ms-2 inline-flex items-center gap-1 text-[10.5px] font-medium text-emerald-700 dark:text-emerald-300">
+              <ShieldCheck size={11} /> {translate('Signed release')}
+            </span>
+          )}
+          {state?.skipped && (
+            <button type="button" onClick={clearSkip} className="ms-2 text-[10.5px] font-medium text-accent-700 underline-offset-2 hover:underline dark:text-accent-300">
+              {translate('Stop skipping this version')}
+            </button>
+          )}
+        </div>
+      )}
+
+      {downloading && (
+        <div className="mt-3 rounded-lg border border-line bg-elevated/40 px-3 py-2.5">
+          <div className="flex items-center justify-between text-[10.5px] text-muted">
+            <span>{translate('Downloading update…')}</span>
+            <span className="font-mono">{state?.progress || 0}%</span>
+          </div>
+          <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-surface ring-1 ring-line">
+            <div className="h-full rounded-full bg-accent-600 transition-[width]" style={{ width: `${Math.max(2, state?.progress || 0)}%` }} />
+          </div>
+        </div>
+      )}
+
+      {ready && (
+        <div className="mt-3 flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50/60 px-3 py-2.5 text-[11.5px] text-emerald-800 dark:border-emerald-900/50 dark:bg-emerald-950/20 dark:text-emerald-200">
+          <CheckCircle2 size={15} /> {translate('Update downloaded and verified. Install it when convenient.')}
+        </div>
+      )}
+
+      {(status === 'error' || status === 'unsupported') && state?.error && (
+        <div className="mt-3 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50/60 px-3 py-2.5 text-[11px] leading-5 text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/20 dark:text-amber-100">
+          <TriangleAlert size={14} className="mt-0.5 shrink-0" /> <span className="break-words">{state.error}</span>
+        </div>
+      )}
+
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <Button onClick={() => check(true)} loading={busy || status === 'checking'} disabled={downloading}>
+          <RefreshCw size={14} /> {translate('Check for updates')}
+        </Button>
+        {available && (
+          <Button variant="copper" onClick={download} loading={busy}>
+            <ArrowDownToLine size={14} /> {translate('Download update')}
+          </Button>
+        )}
+        {ready && (
+          <Button variant="copper" onClick={install} disabled={busy}>
+            <RotateCcw size={14} /> {translate('Install and restart')}
+          </Button>
+        )}
+        {state?.notesUrl && (
+          <Button variant="ghost" onClick={() => api.openExternal(state.notesUrl).catch(() => {})}>
+            <ExternalLink size={14} /> {translate('Release notes')}
+          </Button>
+        )}
+        <Button variant="ghost" onClick={openDialog}>{translate('Update details')}</Button>
+      </div>
+
+      <div className="mt-4 border-t border-line pt-3">
+        <Toggle
+          checked={state?.autoCheck ?? true}
+          onChange={setAutoCheck}
+          label={translate('Check for updates automatically')}
+          description={translate('A quiet check at launch and every six hours. Updates never install without your confirmation.')}
+        />
+      </div>
+    </SectionCard>
+  )
+}
+
 function AboutTab() {
   const { data, clinic, staff } = useApp()
   return (
@@ -1727,6 +1837,8 @@ function AboutTab() {
           ))}
         </div>
       </div>
+
+      <UpdatesCard />
 
       <SectionCard title="Brand and identity" subtitle="One mark across the app, printed documents and clinic signage">
         <div className="grid gap-3 lg:grid-cols-[1.2fr_1fr]">

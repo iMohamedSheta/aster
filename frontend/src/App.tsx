@@ -5,6 +5,7 @@ import { AlertTriangle, Minus, RefreshCw, Square, X } from 'lucide-react'
 import { api, appWindow, onEvent } from './lib/api'
 import { AppContext } from './lib/AppContext'
 import { useLocale } from './lib/LocaleContext'
+import { UpdateProvider } from './lib/UpdateContext'
 import { hasStoredLocale, normalizeLocale } from './lib/i18n'
 import { applyAppearance, persistAppearance, readAppearance, type AccentId, type Appearance, type ElevationId, type RadiusId, type SidebarId } from './lib/appearance'
 import type { BootstrapData } from './lib/types'
@@ -15,6 +16,7 @@ import { TopBar } from './components/TopBar'
 import { StatusBar } from './components/StatusBar'
 import { CommandPalette } from './components/CommandPalette'
 import { AsterMark, Wordmark } from './components/Logo'
+import { UpdateDialog } from './components/UpdateDialog'
 import { Button, Spinner } from './components/ui'
 import { Onboarding } from './pages/Onboarding'
 import { Login } from './pages/Login'
@@ -26,12 +28,14 @@ import { Visits } from './pages/Visits'
 import { EncounterEditor } from './pages/Encounter'
 import { Prescriptions } from './pages/Prescriptions'
 import { Billing } from './pages/Billing'
+import { Services } from './pages/Services'
 import { Reports } from './pages/Reports'
 import { Network } from './pages/Network'
 import { Tasks } from './pages/Tasks'
 import { TreatmentPlans } from './pages/TreatmentPlans'
 import { Inventory } from './pages/Inventory'
 import { Expenses } from './pages/Expenses'
+import { Payroll } from './pages/Payroll'
 import { Files } from './pages/Files'
 import { Settings } from './pages/Settings'
 import { PrintPrescription } from './pages/PrintPrescription'
@@ -112,7 +116,9 @@ function Shell({ onSearch }: { onSearch: () => void }) {
               <Route path="/prescriptions" element={<Prescriptions />} />
               <Route path="/treatment-plans" element={<TreatmentPlans />} />
               <Route path="/billing" element={<Billing />} />
+              <Route path="/services" element={<Services />} />
               <Route path="/expenses" element={<Expenses />} />
+              <Route path="/payroll" element={<Payroll />} />
               <Route path="/inventory" element={<Inventory />} />
               <Route path="/network" element={<Network />} />
               <Route path="/tasks" element={<Tasks />} />
@@ -278,34 +284,37 @@ export default function App() {
 
   return (
     <AppContext.Provider value={value}>
-      <div key={locale} className={cn('flex h-full flex-col bg-canvas text-ink', !data.onboarded && 'overflow-hidden')}>
-        <TitleBar data={data} theme={effectiveTheme} onToggleTheme={() => setTheme(effectiveTheme === 'dark' ? 'light' : 'dark')} />
-        {!data.onboarded ? (
-          <Onboarding initial={data} onDone={async (next) => {
-            setBootstrap(next)
-            await qc.invalidateQueries({ predicate: (q) => String(q.queryKey[0]) !== 'bootstrap' })
-          }} />
-        ) : !data.signedIn ? (
-          <Login data={data} onSignedIn={async (next) => {
-            setBootstrap(next)
-            navigate('/', { replace: true })
-            await qc.invalidateQueries({ predicate: (q) => String(q.queryKey[0]) !== 'bootstrap' })
-          }} />
-        ) : printing ? (
-          <main className="min-h-0 flex-1 overflow-y-auto bg-[#f0f0ec]">
-            <Routes>
-              <Route path="/print/prescriptions/:id" element={<PrintPrescription />} />
-              <Route path="/print/invoices/:id" element={<PrintInvoice />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </main>
-        ) : (
-          <>
-            <Shell onSearch={() => setPaletteOpen(true)} />
-            <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
-          </>
-        )}
-      </div>
+      <UpdateProvider>
+        <div key={locale} className={cn('flex h-full flex-col bg-canvas text-ink', !data.onboarded && 'overflow-hidden')}>
+          <TitleBar data={data} theme={effectiveTheme} onToggleTheme={() => setTheme(effectiveTheme === 'dark' ? 'light' : 'dark')} />
+          {!data.onboarded ? (
+            <Onboarding initial={data} onDone={async (next) => {
+              setBootstrap(next)
+              await qc.invalidateQueries({ predicate: (q) => String(q.queryKey[0]) !== 'bootstrap' })
+            }} />
+          ) : !data.signedIn ? (
+            <Login data={data} onSignedIn={async (next) => {
+              setBootstrap(next)
+              navigate('/', { replace: true })
+              await qc.invalidateQueries({ predicate: (q) => String(q.queryKey[0]) !== 'bootstrap' })
+            }} />
+          ) : printing ? (
+            <main className="min-h-0 flex-1 overflow-y-auto bg-[#f0f0ec]">
+              <Routes>
+                <Route path="/print/prescriptions/:id" element={<PrintPrescription />} />
+                <Route path="/print/invoices/:id" element={<PrintInvoice />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </main>
+          ) : (
+            <>
+              <Shell onSearch={() => setPaletteOpen(true)} />
+              <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
+            </>
+          )}
+        </div>
+        <UpdateDialog />
+      </UpdateProvider>
     </AppContext.Provider>
   )
 }

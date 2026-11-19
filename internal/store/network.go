@@ -15,6 +15,7 @@ var locationTables = []string{
 	"vitals", "diagnoses", "prescriptions", "prescription_items", "services",
 	"invoices", "invoice_items", "payments", "tasks",
 	"treatment_plans", "treatment_plan_items", "inventory_items", "expenses",
+	"staff_pay", "payroll_entries",
 }
 
 // EnsureDefaultLocation makes sure the workspace has at least one clinic

@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import {
   ArrowRight, BarChart3, Boxes, CalendarDays, CalendarPlus, ClipboardList, CornerDownLeft, Database,
-  FolderOpen, LayoutDashboard, Palette, Pill, ReceiptText, Search, Settings2, Stethoscope,
-  UserPlus, Users, Wallet, Wifi,
+  FolderOpen, HandCoins, LayoutDashboard, Palette, Pill, ReceiptText, Search, Settings2, Stethoscope,
+  Tag, UserPlus, Users, Wallet, Wifi,
 } from 'lucide-react'
 import { api } from '../lib/api'
 import { useApp } from '../lib/AppContext'
@@ -27,7 +27,7 @@ interface Entry {
   meta?: string
 }
 
-const pages: { key: string; label: string; icon: React.ReactNode; to: string }[] = [
+const pages: { key: string; label: string; icon: React.ReactNode; to: string; ownerOnly?: boolean }[] = [
   { key: 'nav-dashboard', label: 'Dashboard', icon: <LayoutDashboard size={14} />, to: '/' },
   { key: 'nav-appointments', label: 'Appointments', icon: <CalendarDays size={14} />, to: '/appointments' },
   { key: 'nav-patients', label: 'Patients', icon: <Users size={14} />, to: '/patients' },
@@ -36,7 +36,9 @@ const pages: { key: string; label: string; icon: React.ReactNode; to: string }[]
   { key: 'nav-prescriptions', label: 'Prescriptions', icon: <Pill size={14} />, to: '/prescriptions' },
   { key: 'nav-treatment-plans', label: 'Treatment plans', icon: <ClipboardList size={14} />, to: '/treatment-plans' },
   { key: 'nav-billing', label: 'Billing', icon: <ReceiptText size={14} />, to: '/billing' },
+  { key: 'nav-services', label: 'Services', icon: <Tag size={14} />, to: '/services' },
   { key: 'nav-expenses', label: 'Expenses', icon: <Wallet size={14} />, to: '/expenses' },
+  { key: 'nav-payroll', label: 'Payroll', icon: <HandCoins size={14} />, to: '/payroll', ownerOnly: true },
   { key: 'nav-inventory', label: 'Inventory', icon: <Boxes size={14} />, to: '/inventory' },
   { key: 'nav-reports', label: 'Reports', icon: <BarChart3 size={14} />, to: '/reports' },
   { key: 'nav-settings', label: 'Clinic settings', icon: <Settings2 size={14} />, to: '/settings/clinic' },
@@ -98,10 +100,11 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
 
   const matchedPages = useMemo(() => {
     const q = term.toLowerCase()
-    if (!q) return pages.slice(0, 7)
+    const visible = pages.filter((p) => !p.ownerOnly || currentStaff?.role === 'owner')
+    if (!q) return visible.slice(0, 7)
     if (mode === 'patients') return []
-    return pages.filter((p) => translate(p.label).toLowerCase().includes(q) || p.label.toLowerCase().includes(q)).slice(0, 5)
-  }, [term, mode])
+    return visible.filter((p) => translate(p.label).toLowerCase().includes(q) || p.label.toLowerCase().includes(q)).slice(0, 5)
+  }, [term, mode, currentStaff?.role])
 
   const matchedActions = useMemo(() => {
     const q = term.toLowerCase()

@@ -1,5 +1,8 @@
 # build output
 build/bin/
+build/windows/installer/wails_tools.nsh
+build/windows/installer/tmp/
+dist/
 frontend/dist/
 frontend/node_modules/
 *.db

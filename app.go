@@ -19,6 +19,7 @@ import (
 	"aster/internal/config"
 	"aster/internal/store"
 	"aster/internal/syncengine"
+	"aster/internal/updater"
 	"aster/internal/version"
 )
 
@@ -39,6 +40,9 @@ type App struct {
 	// signedIn is session-scoped on purpose: every launch starts at the
 	// sign-in screen, while the account choice itself is remembered.
 	signedIn atomic.Bool
+
+	// updates is created in startup, before the webview asks for its state.
+	updates atomic.Pointer[updater.Manager]
 
 	// Failed password attempts are tracked per account. The guard lives in
 	// memory only, so restarting the app clears it.
@@ -104,10 +108,28 @@ func (a *App) startup(ctx context.Context) {
 		_ = a.engine.Configure(a.cfg.ServerURL, a.cfg.Token, a.cfg.Fingerprint, a.cfg.DeviceName, a.cfg.Workspace)
 		a.engine.Start(25 * time.Second)
 	}
+
+	manager := updater.NewManager(updater.Options{
+		CurrentVersion: version.Version,
+		DataDir:        a.dataDir,
+		Config:         a.cfg,
+		PublicKey:      version.UpdatePublicKey(),
+		LinuxWebKit:    version.LinuxWebKit,
+		OnState: func(state updater.State) {
+			wruntime.EventsEmit(a.ctx, "update:state", state)
+		},
+		Quit: func() { wruntime.Quit(a.ctx) },
+	})
+	a.updates.Store(manager)
+	manager.Start(ctx)
+
 	go a.dailyBackup()
 }
 
 func (a *App) shutdown(ctx context.Context) {
+	if manager := a.updates.Load(); manager != nil {
+		manager.Stop()
+	}
 	a.engine.Stop()
 	a.mu.Lock()
 	stop := a.beaconStop
@@ -754,6 +776,72 @@ func (a *App) SaveExpense(fields map[string]any) (map[string]any, error) {
 	return a.st.SaveExpense(fields)
 }
 
+// ---- Payroll -------------------------------------------------------------
+//
+// Salary figures are restricted to the clinic manager, even when another
+// account is signed in on this computer.
+
+func (a *App) requirePayrollAccess() error {
+	if !a.signedIn.Load() {
+		return fmt.Errorf("Sign in as the clinic manager first")
+	}
+	if a.cfg.StaffRole != "owner" {
+		return fmt.Errorf("Only the clinic manager can manage payroll")
+	}
+	return nil
+}
+
+// PayrollBoard returns the monthly salary register (period is YYYY-MM). An
+// empty location id aggregates the whole network.
+func (a *App) PayrollBoard(period, locationID string) (map[string]any, error) {
+	if err := a.requirePayrollAccess(); err != nil {
+		return nil, err
+	}
+	return a.st.PayrollBoard(period, locationID)
+}
+
+func (a *App) SaveStaffPay(staffID string, baseCents, allowancesCents, deductionsCents int64, notes string) (map[string]any, error) {
+	if err := a.requirePayrollAccess(); err != nil {
+		return nil, err
+	}
+	return a.st.SaveStaffPay(staffID, baseCents, allowancesCents, deductionsCents, notes)
+}
+
+func (a *App) GeneratePayroll(period, locationID string) (map[string]any, error) {
+	if err := a.requirePayrollAccess(); err != nil {
+		return nil, err
+	}
+	return a.st.GeneratePayroll(period, locationID)
+}
+
+func (a *App) SavePayrollEntry(fields map[string]any) (map[string]any, error) {
+	if err := a.requirePayrollAccess(); err != nil {
+		return nil, err
+	}
+	return a.st.SavePayrollEntry(fields)
+}
+
+func (a *App) PayPayrollEntry(id, method, reference, paidOn string) (map[string]any, error) {
+	if err := a.requirePayrollAccess(); err != nil {
+		return nil, err
+	}
+	return a.st.PayPayrollEntry(id, method, reference, paidOn)
+}
+
+func (a *App) UnpayPayrollEntry(id string) (map[string]any, error) {
+	if err := a.requirePayrollAccess(); err != nil {
+		return nil, err
+	}
+	return a.st.UnpayPayrollEntry(id)
+}
+
+func (a *App) DeletePayrollEntry(id string) error {
+	if err := a.requirePayrollAccess(); err != nil {
+		return err
+	}
+	return a.st.DeletePayrollEntry(id)
+}
+
 // SaveExport writes a generated report (CSV, JSON or HTML) to a file the user
 // chooses. Without a dialog, such as in the hosted web client, it falls back to
 // the workspace exports folder.
@@ -798,6 +886,90 @@ func (a *App) OpenExternal(rawURL string) error {
 	}
 	wruntime.BrowserOpenURL(a.ctx, u.String())
 	return nil
+}
+
+// ---- Updates -------------------------------------------------------------
+
+func (a *App) updateManager() (*updater.Manager, error) {
+	manager := a.updates.Load()
+	if manager == nil {
+		return nil, fmt.Errorf("the update service is not ready")
+	}
+	return manager, nil
+}
+
+func (a *App) updateContext() context.Context {
+	if a.ctx != nil {
+		return a.ctx
+	}
+	return context.Background()
+}
+
+// UpdateState returns the current update snapshot without starting a check.
+func (a *App) UpdateState() updater.State {
+	manager := a.updates.Load()
+	if manager == nil {
+		return updater.State{
+			Status:         updater.StatusIdle,
+			CurrentVersion: version.Version,
+			AutoCheck:      !a.cfg.DisableUpdateCheck,
+			Platform:       runtime.GOOS + "/" + runtime.GOARCH,
+		}
+	}
+	return manager.State()
+}
+
+// CheckForUpdates reads the GitHub release manifest. manual checks report
+// network errors; background checks stay quiet and only update the state.
+func (a *App) CheckForUpdates(manual bool) (updater.State, error) {
+	manager, err := a.updateManager()
+	if err != nil {
+		return a.UpdateState(), err
+	}
+	return manager.Check(a.updateContext(), manual)
+}
+
+func (a *App) DownloadUpdate() (updater.State, error) {
+	manager, err := a.updateManager()
+	if err != nil {
+		return a.UpdateState(), err
+	}
+	return manager.Download(a.updateContext())
+}
+
+// InstallUpdate stages the verified download and asks the platform helper to
+// close Aster, apply the update and reopen it. The app quits shortly after
+// this method returns.
+func (a *App) InstallUpdate() (updater.State, error) {
+	manager, err := a.updateManager()
+	if err != nil {
+		return a.UpdateState(), err
+	}
+	return manager.Install()
+}
+
+func (a *App) SetAutoUpdate(enabled bool) (updater.State, error) {
+	manager, err := a.updateManager()
+	if err != nil {
+		return a.UpdateState(), err
+	}
+	return manager.SetAutoCheck(enabled)
+}
+
+func (a *App) SkipUpdate(version string) (updater.State, error) {
+	manager, err := a.updateManager()
+	if err != nil {
+		return a.UpdateState(), err
+	}
+	return manager.SkipVersion(version)
+}
+
+func (a *App) ClearSkippedUpdate() (updater.State, error) {
+	manager, err := a.updateManager()
+	if err != nil {
+		return a.UpdateState(), err
+	}
+	return manager.ClearSkippedVersion()
 }
 
 func (a *App) Audit(limit int) ([]map[string]any, error) { return a.st.AuditLog(limit) }

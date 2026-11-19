@@ -858,6 +858,10 @@ func (s *Store) updateInTx(tx *sqlx.Tx, entity, id string, candidate map[string]
 	if err != nil {
 		return err
 	}
+	// Take the revision before the transaction reads: nextRev writes the clock
+	// through the pool, and doing that after a read would leave the transaction
+	// with a stale WAL snapshot (SQLITE_BUSY_SNAPSHOT on its first write).
+	rev := s.nextRev()
 	clean := cleanFields(info, candidate)
 	old, err := s.rowMapTx(tx, table, id)
 	if err != nil {
@@ -872,7 +876,6 @@ func (s *Store) updateInTx(tx *sqlx.Tx, entity, id string, candidate map[string]
 	if len(patch) == 0 {
 		return nil
 	}
-	rev := s.nextRev()
 	revs := decodeRevs(fmt.Sprint(old["field_revs"]))
 	for k := range patch {
 		revs[k] = rev

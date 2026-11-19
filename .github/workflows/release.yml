@@ -1,0 +1,496 @@
+name: Release
+
+# The git tag is the single source of truth for the update version. Pushing
+# v1.2.3 builds every platform, signs latest.json when UPDATE_SIGNING_KEY is
+# configured, uploads the installers and only then publishes the release, so
+# releases/latest/download/latest.json never points at missing assets.
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing tag to rebuild, for example v1.2.3
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    name: Read version from tag
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
+      version: ${{ steps.version.outputs.version }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
+          fetch-depth: 1
+
+      - id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}"
+          if [[ ! "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::Release tags must look like v1.2.3 or v1.2.3-beta.1 (got '$tag')."
+            exit 1
+          fi
+          version="${tag#v}"
+          prerelease=false
+          if [[ "$version" == *-* ]]; then prerelease=true; fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "prerelease=$prerelease" >> "$GITHUB_OUTPUT"
+          echo "Releasing Aster $version from $tag (prerelease=$prerelease)"
+
+  windows:
+    name: Windows ${{ matrix.arch }}
+    needs: prepare
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [amd64, arm64]
+    env:
+      ASTER_VERSION: ${{ needs.prepare.outputs.version }}
+      ASTER_ARCH: ${{ matrix.arch }}
+      REQUIRE_SIGNING: ${{ vars.REQUIRE_SIGNING }}
+      WINDOWS_CERT_PFX_BASE64: ${{ secrets.WINDOWS_CERT_PFX_BASE64 }}
+      WINDOWS_CERT_PASSWORD: ${{ secrets.WINDOWS_CERT_PASSWORD }}
+      WINDOWS_TIMESTAMP_URL: ${{ vars.WINDOWS_TIMESTAMP_URL }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.tag }}
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Wails, NSIS and frontend dependencies
+        shell: pwsh
+        run: |
+          go install github.com/wailsapp/wails/v2/cmd/wails@v2.10.2
+          choco install nsis --yes --no-progress
+          "$(go env GOPATH)\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
+          "C:\Program Files (x86)\NSIS" | Out-File -FilePath $env:GITHUB_PATH -Append
+          Push-Location frontend
+          npm ci
+          Pop-Location
+
+      - name: Set version
+        shell: pwsh
+        run: node scripts/set-version.mjs $env:ASTER_VERSION
+
+      - name: Build application and installer
+        shell: pwsh
+        run: |
+          $buildDate = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
+          wails build -clean -platform windows/$env:ASTER_ARCH -nsis `
+            -ldflags "-X aster/internal/version.Version=$env:ASTER_VERSION -X aster/internal/version.Commit=$env:GITHUB_SHA -X aster/internal/version.BuildDate=$buildDate"
+          if ($LASTEXITCODE -ne 0) { throw "wails build failed" }
+
+      - name: Sign binaries and rebuild the installer
+        shell: pwsh
+        run: |
+          $setup = "build\bin\Aster-$env:ASTER_VERSION-windows-$env:ASTER_ARCH-setup.exe"
+          if (-not (Test-Path $setup)) { throw "Installer $setup was not produced." }
+          if ($env:WINDOWS_CERT_PFX_BASE64) {
+            $pfx = Join-Path $env:RUNNER_TEMP 'aster-signing.pfx'
+            [IO.File]::WriteAllBytes($pfx, [Convert]::FromBase64String($env:WINDOWS_CERT_PFX_BASE64))
+            $signtool = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin" -Recurse -Filter signtool.exe -ErrorAction SilentlyContinue |
+              Where-Object { $_.FullName -like '*\x64\signtool.exe' } |
+              Sort-Object FullName -Descending | Select-Object -First 1
+            if (-not $signtool) { throw 'signtool.exe was not found on the runner.' }
+            $timestamp = if ($env:WINDOWS_TIMESTAMP_URL) { $env:WINDOWS_TIMESTAMP_URL } else { 'http://timestamp.digicert.com' }
+            function Sign-AsterFile([string]$path) {
+              & $signtool.FullName sign /fd SHA256 /f $pfx /p $env:WINDOWS_CERT_PASSWORD /tr $timestamp /td SHA256 $path
+              if ($LASTEXITCODE -ne 0) { throw "Signing failed for $path" }
+            }
+            Sign-AsterFile 'build\bin\Aster.exe'
+
+            # The installed exe is now signed; rebuild the installer so it
+            # carries that exact file, then sign the installer itself.
+            $define = if ($env:ASTER_ARCH -eq 'arm64') { '-DARG_WAILS_ARM64_BINARY=..\..\bin\Aster.exe' } else { '-DARG_WAILS_AMD64_BINARY=..\..\bin\Aster.exe' }
+            Push-Location build\windows\installer
+            try {
+              & makensis $define project.nsi
+              if ($LASTEXITCODE -ne 0) { throw 'makensis failed while rebuilding the signed installer.' }
+            } finally {
+              Pop-Location
+            }
+            Sign-AsterFile $setup
+          } elseif ($env:REQUIRE_SIGNING -eq 'true') {
+            throw 'REQUIRE_SIGNING is true but WINDOWS_CERT_PFX_BASE64 is not configured.'
+          } else {
+            Write-Host '::warning::Windows binaries are unsigned. Configure WINDOWS_CERT_PFX_BASE64 and WINDOWS_CERT_PASSWORD for production releases.'
+          }
+
+      - name: Build portable zip
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          Compress-Archive -Path build\bin\Aster.exe `
+            -DestinationPath "dist\Aster-$env:ASTER_VERSION-windows-$env:ASTER_ARCH-portable.zip" -Force
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-${{ matrix.arch }}
+          path: |
+            build/bin/Aster-${{ needs.prepare.outputs.version }}-windows-${{ matrix.arch }}-setup.exe
+            dist/Aster-*-portable.zip
+          if-no-files-found: error
+
+  macos:
+    name: macOS universal
+    needs: prepare
+    runs-on: macos-14
+    env:
+      ASTER_VERSION: ${{ needs.prepare.outputs.version }}
+      REQUIRE_SIGNING: ${{ vars.REQUIRE_SIGNING }}
+      APPLE_CERT_P12_BASE64: ${{ secrets.APPLE_CERT_P12_BASE64 }}
+      APPLE_CERT_PASSWORD: ${{ secrets.APPLE_CERT_PASSWORD }}
+      APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+      APPLE_ID: ${{ secrets.APPLE_ID }}
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.tag }}
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Wails and frontend dependencies
+        run: |
+          go install github.com/wailsapp/wails/v2/cmd/wails@v2.10.2
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+          cd frontend && npm ci
+
+      - name: Set version
+        run: node scripts/set-version.mjs "$ASTER_VERSION"
+
+      - name: Build universal app
+        run: |
+          wails build -clean -platform darwin/universal \
+            -ldflags "-X aster/internal/version.Version=$ASTER_VERSION -X aster/internal/version.Commit=$GITHUB_SHA -X aster/internal/version.BuildDate=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+      - name: Sign and notarize
+        env:
+          RUNNER_TEMP: ${{ runner.temp }}
+        run: |
+          set -euo pipefail
+          app="build/bin/Aster.app"
+          zip="dist/Aster-$ASTER_VERSION-darwin-universal.zip"
+          mkdir -p dist
+
+          if [ -n "${APPLE_CERT_P12_BASE64:-}" ]; then
+            keychain="$RUNNER_TEMP/aster-signing.keychain-db"
+            keychain_password="$(openssl rand -base64 24)"
+            security create-keychain -p "$keychain_password" "$keychain"
+            security default-keychain -s "$keychain"
+            security unlock-keychain -p "$keychain_password" "$keychain"
+            security set-keychain-settings -lut 3600 "$keychain"
+            echo "$APPLE_CERT_P12_BASE64" | base64 --decode > "$RUNNER_TEMP/aster-signing.p12"
+            security import "$RUNNER_TEMP/aster-signing.p12" -k "$keychain" -P "$APPLE_CERT_PASSWORD" -T /usr/bin/codesign
+            security set-key-partition-list -S apple-tool:,apple: -s -k "$keychain_password" "$keychain" >/dev/null
+
+            if [ -z "${APPLE_SIGNING_IDENTITY:-}" ]; then
+              echo "::error::APPLE_SIGNING_IDENTITY is required when APPLE_CERT_P12_BASE64 is set."
+              exit 1
+            fi
+
+            codesign --force --deep --options runtime \
+              --entitlements build/darwin/entitlements.plist \
+              --sign "$APPLE_SIGNING_IDENTITY" "$app"
+            codesign --verify --deep --strict --verbose=2 "$app"
+
+            if [ -n "${APPLE_ID:-}" ] && [ -n "${APPLE_TEAM_ID:-}" ] && [ -n "${APPLE_APP_PASSWORD:-}" ]; then
+              ditto -c -k --sequesterRsrc --keepParent "$app" "$RUNNER_TEMP/Aster-notarize.zip"
+              xcrun notarytool submit "$RUNNER_TEMP/Aster-notarize.zip" \
+                --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" --password "$APPLE_APP_PASSWORD" --wait
+              xcrun stapler staple "$app"
+              xcrun stapler validate "$app"
+            elif [ "${REQUIRE_SIGNING:-false}" = "true" ]; then
+              echo "::error::REQUIRE_SIGNING is true but Apple notarization credentials are missing."
+              exit 1
+            else
+              echo "::warning::The app is signed but not notarized; set APPLE_ID, APPLE_TEAM_ID and APPLE_APP_PASSWORD."
+            fi
+          elif [ "${REQUIRE_SIGNING:-false}" = "true" ]; then
+            echo "::error::REQUIRE_SIGNING is true but APPLE_CERT_P12_BASE64 is not configured."
+            exit 1
+          else
+            echo "::warning::The macOS app is unsigned. Configure Apple signing secrets for production releases."
+          fi
+
+          ditto -c -k --sequesterRsrc --keepParent "$app" "$zip"
+
+          # The DMG is the manual download; the app updates itself from the
+          # zip, which keeps the signed bundle intact. Stage the bundle with
+          # the usual Applications shortcut so the disk image is drag-ready.
+          rm -rf "$RUNNER_TEMP/dmg"
+          mkdir -p "$RUNNER_TEMP/dmg"
+          ditto "$app" "$RUNNER_TEMP/dmg/Aster.app"
+          ln -s /Applications "$RUNNER_TEMP/dmg/Applications"
+          hdiutil create -volname "Aster" -srcfolder "$RUNNER_TEMP/dmg" -ov -format UDZO \
+            "dist/Aster-$ASTER_VERSION-darwin-universal.dmg"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos
+          path: |
+            dist/Aster-*-darwin-universal.zip
+            dist/Aster-*-darwin-universal.dmg
+          if-no-files-found: error
+
+  linux:
+    name: Linux ${{ matrix.arch }} webkit${{ matrix.webkit }}
+    needs: prepare
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-22.04
+            arch: amd64
+            webkit: '40'
+            tags: ''
+          - runner: ubuntu-24.04
+            arch: amd64
+            webkit: '41'
+            tags: webkit2_41
+          - runner: ubuntu-24.04-arm
+            arch: arm64
+            webkit: '41'
+            tags: webkit2_41
+    env:
+      ASTER_VERSION: ${{ needs.prepare.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.tag }}
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential pkg-config libgtk-3-dev
+          if [ "${{ matrix.webkit }}" = "40" ]; then
+            sudo apt-get install -y libwebkit2gtk-4.0-dev
+          else
+            sudo apt-get install -y libwebkit2gtk-4.1-dev
+          fi
+
+      - name: Install Wails and frontend dependencies
+        run: |
+          go install github.com/wailsapp/wails/v2/cmd/wails@v2.10.2
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+          cd frontend && npm ci
+
+      - name: Set version
+        run: node scripts/set-version.mjs "$ASTER_VERSION"
+
+      - name: Build Linux binary
+        shell: bash
+        run: |
+          set -euo pipefail
+          tags=()
+          if [ -n "${{ matrix.tags }}" ]; then tags=(-tags "${{ matrix.tags }}"); fi
+          wails build -clean -platform linux/${{ matrix.arch }} "${tags[@]}" \
+            -ldflags "-X aster/internal/version.Version=$ASTER_VERSION -X aster/internal/version.Commit=$GITHUB_SHA -X aster/internal/version.BuildDate=$(date -u +%Y-%m-%dT%H:%M:%SZ) -X aster/internal/version.LinuxWebKit=${{ matrix.webkit }}"
+
+      - name: Package tarball and .deb
+        shell: bash
+        run: |
+          set -euo pipefail
+          name="Aster-$ASTER_VERSION-linux-${{ matrix.arch }}-webkit${{ matrix.webkit }}"
+          mkdir -p dist staging
+          install -m 0755 build/bin/Aster staging/aster
+          install -m 0644 packaging/linux/aster.desktop staging/aster.desktop
+          install -m 0755 packaging/linux/install-user.sh staging/install.sh
+          install -m 0755 packaging/linux/uninstall-user.sh staging/uninstall.sh
+          install -m 0644 build/appicon.png staging/aster.png
+          tar -czf "dist/$name.tar.gz" -C staging .
+
+          go install github.com/goreleaser/nfpm/v2/cmd/nfpm@latest
+          if [ "${{ matrix.webkit }}" = "40" ]; then
+            webkit_dep="libwebkit2gtk-4.0-0"
+          else
+            webkit_dep="libwebkit2gtk-4.1-0"
+          fi
+          cat > "$RUNNER_TEMP/nfpm.yaml" <<EOF
+          name: aster
+          arch: ${{ matrix.arch }}
+          platform: linux
+          version: "$ASTER_VERSION"
+          section: utils
+          priority: optional
+          maintainer: Aster Clinic
+          vendor: Aster Clinic
+          homepage: https://github.com/iMohamedSheta/aster
+          license: Proprietary
+          description: Aster local-first clinic workspace.
+          depends:
+            - libgtk-3-0
+            - $webkit_dep
+          contents:
+            - src: $PWD/staging/aster
+              dst: /usr/bin/aster
+            - src: $PWD/staging/aster.desktop
+              dst: /usr/share/applications/aster.desktop
+            - src: $PWD/staging/aster.png
+              dst: /usr/share/icons/hicolor/512x512/apps/aster.png
+          EOF
+          "$(go env GOPATH)/bin/nfpm" package --config "$RUNNER_TEMP/nfpm.yaml" \
+            --packager deb --target "dist/$name.deb"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-${{ matrix.arch }}-webkit${{ matrix.webkit }}
+          path: |
+            dist/Aster-*.tar.gz
+            dist/Aster-*.deb
+          if-no-files-found: error
+
+  publish:
+    name: Publish GitHub release
+    needs: [prepare, windows, macos, linux]
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: ${{ needs.prepare.outputs.tag }}
+      VERSION: ${{ needs.prepare.outputs.version }}
+      PRERELEASE: ${{ needs.prepare.outputs.prerelease }}
+      UPDATE_SIGNING_KEY: ${{ secrets.UPDATE_SIGNING_KEY }}
+      REQUIRE_SIGNING: ${{ vars.REQUIRE_SIGNING }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.tag }}
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Write checksums
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd dist
+          find . -maxdepth 1 -type f ! -name 'latest.json' ! -name 'SHA256SUMS.txt' -print0 \
+            | sort -z | xargs -0 sha256sum > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      - name: Build signed latest.json
+        shell: bash
+        run: |
+          set -euo pipefail
+          key_args=()
+          if [ -n "${UPDATE_SIGNING_KEY:-}" ]; then
+            printf '%s' "$UPDATE_SIGNING_KEY" > "$RUNNER_TEMP/update_signing_key"
+            key_args=(-key "$RUNNER_TEMP/update_signing_key")
+          else
+            committed="$(grep -v '^#' internal/version/update_public_key.txt | tr -d '[:space:]' || true)"
+            if [ -n "$committed" ]; then
+              echo "::error::This build embeds an update public key, so latest.json must be signed. Set the UPDATE_SIGNING_KEY secret."
+              exit 1
+            fi
+            if [ "${REQUIRE_SIGNING:-false}" = "true" ]; then
+              echo "::error::REQUIRE_SIGNING is true but UPDATE_SIGNING_KEY is not configured."
+              exit 1
+            fi
+            echo "::warning::Publishing an unsigned latest.json; this is only suitable for development releases."
+          fi
+
+          go run ./cmd/releasectl manifest \
+            -version "$VERSION" \
+            -assets dist \
+            -out dist/latest.json \
+            "${key_args[@]}"
+
+          if [ -n "${UPDATE_SIGNING_KEY:-}" ]; then
+            go run ./cmd/releasectl publickey -key "$RUNNER_TEMP/update_signing_key" -out "$RUNNER_TEMP/update_public_key.txt"
+            derived="$(grep -v '^#' "$RUNNER_TEMP/update_public_key.txt" | tr -d '[:space:]')"
+            committed="$(grep -v '^#' internal/version/update_public_key.txt | tr -d '[:space:]' || true)"
+            if [ -n "$committed" ] && [ "$committed" != "$derived" ]; then
+              echo "::error::UPDATE_SIGNING_KEY does not match internal/version/update_public_key.txt."
+              exit 1
+            fi
+            go run ./cmd/releasectl verify -manifest dist/latest.json -key "$RUNNER_TEMP/update_public_key.txt"
+          fi
+
+      - name: Create draft release and upload assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            gh release create "$TAG" --draft --title "Aster $VERSION" --generate-notes
+          fi
+
+          for file in dist/*; do
+            base="$(basename "$file")"
+            case "$base" in
+              latest.json|SHA256SUMS.txt) continue ;;
+            esac
+            gh release upload "$TAG" "$file" --clobber
+          done
+          gh release upload "$TAG" dist/SHA256SUMS.txt --clobber
+
+          # The manifest goes last: until it exists, installed apps see no
+          # update, and once it exists every referenced asset is downloadable.
+          gh release upload "$TAG" dist/latest.json --clobber
+
+      - name: Publish release
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$PRERELEASE" = "true" ]; then
+            gh release edit "$TAG" --draft=false --prerelease
+          else
+            gh release edit "$TAG" --draft=false --latest
+          fi
+          gh release view "$TAG" --json url,isDraft,isPrerelease,tagName --jq .

@@ -13,6 +13,7 @@ import { VisitDialog } from './VisitDialog'
 import { InvoiceDialog } from './BillingDialogs'
 import { PatientFileDialog } from './PatientFileDialog'
 import { PageGuideSheet } from './PageGuide'
+import { UpdateIndicator } from './UpdateDialog'
 
 type QuickPanel = 'patient' | 'appointment' | 'visit' | 'invoice' | 'document' | null
 
@@ -40,6 +41,8 @@ export function TopBar({ onSearch }: { onSearch: () => void }) {
           <CalendarDays size={13} className="text-accent-600" />
           <span className="font-mono normal-case tracking-normal">{shortDay(new Date())}</span>
         </span>
+
+        <UpdateIndicator />
 
         <button
           type="button"

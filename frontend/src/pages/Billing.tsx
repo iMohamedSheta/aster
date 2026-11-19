@@ -2,21 +2,18 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
-  Banknote, Eye, MoreHorizontal, Pencil, Plus, Printer, ReceiptText, Search,
-  Stethoscope, Tag, Wallet, X,
+  Banknote, Eye, MoreHorizontal, Percent, Plus, Printer, ReceiptText, Search, Wallet, X,
 } from 'lucide-react'
 import { api } from '../lib/api'
 import { useApp } from '../lib/AppContext'
 import { cn, fmtDate, money, plural } from '../lib/format'
-import type { Invoice, Service } from '../lib/types'
+import type { Invoice } from '../lib/types'
 import {
   Badge, Button, Dropdown, EmptyState, IconButton, MenuItem, PageHeader, StatusBadge,
-  Tabs,
 } from '../components/ui'
 import { InvoiceDetailModal } from '../components/InvoiceDetailModal'
-import { InvoiceDialog, PaymentDialog, ServiceDialog } from '../components/BillingDialogs'
+import { InvoiceDialog, PaymentDialog } from '../components/BillingDialogs'
 
-type Tab = 'invoices' | 'services'
 type Filter = 'all' | 'open' | 'paid' | 'void'
 
 const filterTabs: { value: Filter; label: string }[] = [
@@ -35,23 +32,15 @@ export function Billing() {
   const navigate = useNavigate()
   const qc = useQueryClient()
   const [params, setParams] = useSearchParams()
-  const [tab, setTab] = useState<Tab>('invoices')
   const [filter, setFilter] = useState<Filter>((params.get('filter') as Filter) || 'all')
   const [query, setQuery] = useState('')
   const [detailId, setDetailId] = useState<string | null>(null)
   const [invoiceOpen, setInvoiceOpen] = useState(false)
   const [paymentFor, setPaymentFor] = useState<Invoice | null>(null)
-  const [serviceOpen, setServiceOpen] = useState(false)
-  const [editingService, setEditingService] = useState<Service | null>(null)
 
   const { data: invoices = [], isLoading: loadingInvoices } = useQuery({
     queryKey: ['invoices', 'all'],
     queryFn: () => api.invoices('all') as Promise<Invoice[]>,
-  })
-
-  const { data: services = [], isLoading: loadingServices } = useQuery({
-    queryKey: ['services'],
-    queryFn: () => api.services() as Promise<Service[]>,
   })
 
   useEffect(() => {
@@ -88,7 +77,7 @@ export function Billing() {
       collected += inv.paid_cents ?? 0
       outstanding += balanceOf(inv)
     }
-    return { outstanding, billed, collected }
+    return { outstanding, billed, collected, rate: billed > 0 ? Math.round((collected / billed) * 100) : 0 }
   }, [invoices])
 
   const rows = useMemo(() => {
@@ -102,17 +91,6 @@ export function Billing() {
         .join(' ').toLowerCase().includes(q)
     })
   }, [invoices, filter, query])
-
-  const serviceGroups = useMemo(() => {
-    const map = new Map<string, Service[]>()
-    for (const svc of services) {
-      const key = svc.category?.trim() || 'Uncategorised'
-      const list = map.get(key) ?? []
-      list.push(svc)
-      map.set(key, list)
-    }
-    return [...map.entries()].sort(([a], [b]) => a.localeCompare(b))
-  }, [services])
 
   function changeFilter(next: Filter) {
     setFilter(next)
@@ -132,10 +110,7 @@ export function Billing() {
         title="Billing"
         description={`${plural(counts.open, 'open invoice')} · ${money(totals.outstanding, clinic?.currency_symbol)} outstanding. Invoices are permanent; void one to correct a mistake.`}
         actions={(
-          <>
-            <Button onClick={() => { setEditingService(null); setServiceOpen(true) }}><Tag size={14} /> Add service</Button>
-            <Button variant="primary" onClick={() => setInvoiceOpen(true)}><Plus size={14} /> New invoice</Button>
-          </>
+          <Button variant="primary" onClick={() => setInvoiceOpen(true)}><Plus size={14} /> New invoice</Button>
         )}
       />
 
@@ -144,7 +119,7 @@ export function Billing() {
           { label: 'Outstanding balance', value: money(totals.outstanding, clinic?.currency_symbol), hint: `${counts.open} invoice${counts.open === 1 ? '' : 's'} awaiting payment`, icon: Wallet, tone: 'rose' },
           { label: 'Billed to date', value: money(totals.billed, clinic?.currency_symbol), hint: 'All non-void invoices', icon: ReceiptText, tone: 'blue' },
           { label: 'Collected', value: money(totals.collected, clinic?.currency_symbol), hint: 'Payments recorded against invoices', icon: Banknote, tone: 'brand' },
-          { label: 'Active services', value: services.length, hint: 'Available in the invoice builder', icon: Stethoscope, tone: 'amber' },
+          { label: 'Collection rate', value: totals.billed > 0 ? `${totals.rate}%` : '—', hint: 'Collected against billed value', icon: Percent, tone: 'amber' },
         ].map((card) => (
           <div key={card.label} className="card p-4">
             <div className="flex items-start justify-between">
@@ -167,34 +142,23 @@ export function Billing() {
         ))}
       </div>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <Tabs<Tab>
-          value={tab}
-          onChange={setTab}
-          tabs={[
-            { value: 'invoices', label: 'Invoices', count: invoices.length },
-            { value: 'services', label: 'Services & prices', count: services.length },
-          ]}
-        />
-        {tab === 'invoices' && (
-          <div className="relative ms-auto w-full min-w-[230px] sm:w-[300px]">
-            <Search size={14} className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-faint" />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search invoice or patient…"
-              className="input h-9 ps-9 pe-8"
-            />
-            {query && (
-              <button onClick={() => setQuery('')} className="absolute end-2.5 top-1/2 -translate-y-1/2 rounded p-0.5 text-faint hover:text-ink" aria-label="Clear search">
-                <X size={13} />
-              </button>
-            )}
-          </div>
-        )}
+      <div className="flex flex-wrap items-center justify-end gap-3">
+        <div className="relative w-full min-w-[230px] sm:w-[300px]">
+          <Search size={14} className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-faint" />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search invoice or patient…"
+            className="input h-9 ps-9 pe-8"
+          />
+          {query && (
+            <button onClick={() => setQuery('')} className="absolute end-2.5 top-1/2 -translate-y-1/2 rounded p-0.5 text-faint hover:text-ink" aria-label="Clear search">
+              <X size={13} />
+            </button>
+          )}
+        </div>
       </div>
 
-      {tab === 'invoices' ? (
         <div className="card overflow-hidden">
           <div className="flex flex-wrap items-center gap-2 border-b border-line px-4 py-2.5">
             <div className="inline-flex items-center gap-0.5 rounded-lg border border-line bg-elevated p-0.5">
@@ -321,114 +285,6 @@ export function Billing() {
             </div>
           )}
         </div>
-      ) : (
-        <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
-          <div className="card overflow-hidden">
-            <div className="flex items-center justify-between border-b border-line px-4 py-3">
-              <div>
-                <h2 className="text-[13.5px] font-semibold text-ink">Service catalogue</h2>
-                <p className="mt-0.5 text-[11px] text-muted">Prices used to build invoices. Only active services can be selected.</p>
-              </div>
-              <Button size="sm" onClick={() => { setEditingService(null); setServiceOpen(true) }}><Plus size={13} /> Add</Button>
-            </div>
-            {loadingServices ? (
-              <div className="divide-y divide-line">
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="flex animate-pulse items-center gap-3 px-4 py-3.5">
-                    <div className="flex-1 space-y-1.5"><div className="h-3 w-44 rounded bg-elevated" /><div className="h-2.5 w-24 rounded bg-elevated" /></div>
-                    <div className="h-3 w-16 rounded bg-elevated" />
-                  </div>
-                ))}
-              </div>
-            ) : services.length === 0 ? (
-              <div className="p-4">
-                <EmptyState
-                  icon={<Tag size={18} />}
-                  title="No services yet"
-                  description="Add consultations, procedures and laboratory tests once, then pick them while invoicing."
-                  action={<Button variant="primary" onClick={() => setServiceOpen(true)}><Plus size={14} /> Add a service</Button>}
-                />
-              </div>
-            ) : (
-              <div className="divide-y divide-line">
-                {serviceGroups.map(([category, list]) => (
-                  <div key={category}>
-                    <div className="flex items-center justify-between bg-elevated/60 px-4 py-1.5">
-                      <span className="text-[9.5px] font-semibold uppercase tracking-[0.1em] text-faint">{category}</span>
-                      <span className="text-[9.5px] text-faint">{list.length}</span>
-                    </div>
-                    {list.map((svc) => (
-                      <div key={svc.id} className="flex items-center gap-3 px-4 py-2.5 transition hover:bg-elevated/50">
-                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-700 dark:bg-brand-900/40 dark:text-brand-200">
-                          <Stethoscope size={14} />
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <div className="truncate text-[12px] font-medium text-ink">{svc.name}</div>
-                          <div className="text-[10px] text-faint">
-                            {svc.code || 'No code'} · {svc.duration_min} min{svc.description ? ` · ${svc.description}` : ''}
-                          </div>
-                        </div>
-                        <div className="text-end text-[12px] font-semibold tabular-nums text-ink">{money(svc.price_cents, clinic?.currency_symbol)}</div>
-                        <IconButton label={`Edit ${svc.name}`} className="h-7 w-7" onClick={() => { setEditingService(svc); setServiceOpen(true) }}>
-                          <Pencil size={13} />
-                        </IconButton>
-                      </div>
-                    ))}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="space-y-4">
-            <div className="card p-4">
-              <div className="flex items-center gap-2">
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-200"><Banknote size={15} /></span>
-                <div>
-                  <div className="text-[12.5px] font-semibold text-ink">Collections at a glance</div>
-                  <div className="text-[10.5px] text-faint">All time, excluding void invoices</div>
-                </div>
-              </div>
-              <div className="mt-4 space-y-2">
-                <div className="flex items-baseline justify-between">
-                  <span className="text-[11.5px] text-muted">Collected</span>
-                  <span className="text-[14px] font-semibold tabular-nums text-ink">{money(totals.collected, clinic?.currency_symbol)}</span>
-                </div>
-                <div className="flex items-baseline justify-between">
-                  <span className="text-[11.5px] text-muted">Still owed</span>
-                  <span className={cn('text-[14px] font-semibold tabular-nums', totals.outstanding > 0 ? 'text-rose-600 dark:text-rose-300' : 'text-ink')}>{money(totals.outstanding, clinic?.currency_symbol)}</span>
-                </div>
-                <div className="h-1.5 overflow-hidden rounded-full bg-elevated">
-                  <div
-                    className="h-full rounded-full bg-brand-600"
-                    style={{ width: `${totals.billed > 0 ? Math.min(100, (totals.collected / totals.billed) * 100) : 0}%` }}
-                  />
-                </div>
-                <div className="text-end text-[10px] text-faint">
-                  {totals.billed > 0 ? `${Math.round((totals.collected / totals.billed) * 100)}% of billed value collected` : 'Nothing billed yet'}
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-xl border border-line bg-elevated/40 p-4 text-[11px] leading-5 text-muted">
-              <div className="mb-1 text-[11.5px] font-semibold text-ink">A clean financial trail</div>
-              Invoices carry a clinic-issued number, line items, tax and payments. A voided invoice keeps its number and history, so a gap in the sequence never hides a correction.
-            </div>
-
-            <div className="card p-4">
-              <div className="text-[11.5px] font-semibold text-ink">Payment methods</div>
-              <div className="mt-2 flex flex-wrap gap-1.5">
-                {['Cash', 'Card', 'Bank transfer', 'Insurance', 'Other'].map((m) => (
-                  <Badge key={m} tone="neutral">{m}</Badge>
-                ))}
-              </div>
-              <p className="mt-2 text-[10.5px] leading-4 text-faint">
-                Methods are recorded with each payment for reconciliation. Front desk and billing roles can take payments.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
 
       <InvoiceDetailModal open={Boolean(detailId)} onClose={() => setDetailId(null)} invoiceId={detailId} />
       <InvoiceDialog open={invoiceOpen} onClose={() => setInvoiceOpen(false)} onSaved={(inv) => { if (inv?.id) setDetailId(inv.id) }} />
@@ -438,7 +294,6 @@ export function Billing() {
         invoice={paymentFor}
         onSaved={() => qc.invalidateQueries()}
       />
-      <ServiceDialog open={serviceOpen} onClose={() => { setServiceOpen(false); setEditingService(null) }} service={editingService} />
     </div>
   )
 }

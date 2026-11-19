@@ -29,6 +29,12 @@ type Config struct {
 	Theme       string `json:"theme"`
 	Locale      string `json:"locale"`
 
+	// Update preferences. DisableUpdateCheck is inverted so existing device
+	// files (where the field is absent) keep automatic updates on.
+	DisableUpdateCheck bool   `json:"disableUpdateCheck,omitempty"`
+	SkippedUpdate      string `json:"skippedUpdate,omitempty"`
+	LastUpdateCheck    string `json:"lastUpdateCheck,omitempty"`
+
 	mu   sync.Mutex
 	path string
 }
